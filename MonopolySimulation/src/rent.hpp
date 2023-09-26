@@ -94,6 +94,8 @@ namespace monopoly {
 
 			statistics.rent_paid_total[player] += rent;
 			statistics.rent_received_total[*owner] += rent;
+			++statistics.rent_paid_count[player];
+			++statistics.rent_received_count[*owner];
 		}
 	}
 

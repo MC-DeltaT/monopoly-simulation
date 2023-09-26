@@ -11,6 +11,7 @@
 #include "property_buy.hpp"
 #include "random.hpp"
 #include "rent.hpp"
+#include "statistics.hpp"
 
 
 namespace monopoly::board_effects {
@@ -74,12 +75,14 @@ namespace monopoly::board_effects {
 	inline void on_chance_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto const card = draw_card<card_type_t::chance>(game_state);
+		++statistics.cards_drawn[player];
 		on_card(game_state, strategies, random, player, card);
 	}
 
 	inline void on_community_chest_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto const card = draw_card<card_type_t::community_chest>(game_state);
+		++statistics.cards_drawn[player];
 		on_card(game_state, strategies, random, player, card);
 	}
 

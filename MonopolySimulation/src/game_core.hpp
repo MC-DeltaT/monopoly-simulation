@@ -57,6 +57,11 @@ namespace monopoly {
 
 		statistics.game_count += 1;
 		statistics.round_count += game_state.round;
+		for (auto const player : players) {
+			auto const bankrupt_round = game_state.players[player].bankrupt_round;
+			// Note round number begins at 0, while number of rounds is always >= 1.
+			statistics.turn_count[player] += bankrupt_round.has_value() ? *bankrupt_round + 1 : game_state.round;
+		}
 	}
 
 

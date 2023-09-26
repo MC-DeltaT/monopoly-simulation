@@ -13,6 +13,7 @@
 #include "player_strategy.hpp"
 #include "position.hpp"
 #include "random.hpp"
+#include "statistics.hpp"
 
 
 namespace monopoly {

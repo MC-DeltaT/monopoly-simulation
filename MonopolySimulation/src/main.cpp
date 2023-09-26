@@ -16,46 +16,73 @@
 void print_statistics() {
 	using namespace monopoly;
 
-	std::cout << "Game length: " << statistics.game_length_mean() << std::endl;
+	std::cout << "Mean game length: " << statistics.game_length_mean() << "\n\n";
 
-	std::cout << "Player ranks:" << std::endl;
+	std::cout << "Mean player ranks:\n";
 	for (auto const player : players) {
-		std::cout << "  Player " << player << ": " << statistics.player_rank_mean(player) << std::endl;
+		std::cout << "  Player " << player << ": " << statistics.player_rank_mean(player) << "\n";
 	}
+	std::cout << "\n";
 
-	std::cout << "Final net worths:" << std::endl;
+	std::cout << "Mean final net worths:\n";
 	for (auto const player : players) {
-		std::cout << "  Player " << player << ": " << statistics.final_net_worth_mean(player) << std::endl;
+		std::cout << "  Player " << player << ": " << statistics.final_net_worth_mean(player) << '\n';
 	}
+	std::cout << "\n";
 
-	std::cout << "Board space frequencies:" << std::endl;
+	std::cout << "Board space frequencies:\n";
 	for (unsigned space = 0; space < board_space_count + 1; ++space) {
-		std::cout << "  Space " << space << ": " << statistics.board_space_relative_freq(space) << std::endl;
+		std::cout << "  Space " << space << ": " << statistics.board_space_relative_freq(space) << '\n';
 	}
+	std::cout << "\n";
 
-	std::cout << "Mean times sent to jail per game:" << std::endl;
+	std::cout << "Mean times sent to jail:\n";
 	for (auto const player : players) {
-		std::cout << "  Player " << player << ": " << statistics.sent_to_jail_count_mean_per_game(player) << std::endl;
+		std::cout << "  Player " << player << ":\t"
+			<< statistics.sent_to_jail_count_mean().per_game(player) << "/g  \t"
+			<< statistics.sent_to_jail_count_mean().per_turn(player) << "/t\n";
 	}
+	std::cout << "\n";
 
-	std::cout << "Mean jail duration: " << statistics.jail_duration_mean() << std::endl;
+	std::cout << "Mean jail duration: " << statistics.jail_duration_mean() << "\n\n";
 
-	std::cout << "Mean total rent payments per game" << std::endl;
+	std::cout << "Mean rent payments:\n";
 	for (auto const player : players) {
-		std::cout << "  Player " << player << ": "
-			<< '+' << statistics.rent_received_mean_per_game(player) << " / "
-			<< '-' << statistics.rent_paid_mean_per_game(player) << std::endl;
+		std::cout << "  Player " << player << ":\n"
+			<< "    +" << statistics.rent_received_mean().per_game(player) << "/g  \t"
+			<< "    +" << statistics.rent_received_mean().per_turn(player) << "/t  \t"
+			<< "    +" << statistics.rent_received_mean().per_sample(player) << "/s\n"
+			<< "    -" << statistics.rent_paid_mean().per_game(player) << "/g  \t"
+			<< "    -" << statistics.rent_paid_mean().per_turn(player) << "/t  \t"
+			<< "    -" << statistics.rent_paid_mean().per_sample(player) << "/s\n";
 	}
+	std::cout << "\n";
 
-	std::cout << "Mean total card cash awards per game" << std::endl;
+	std::cout << "Mean card cash awards:\n";
 	for (auto const player : players) {
-		std::cout << "  Player " << player << ": " << statistics.card_cash_award_mean_per_game(player) << std::endl;
+		std::cout << "  Player " << player << ":\t"
+			<< statistics.card_cash_award_mean().per_game(player) << "/g  \t"
+			<< statistics.card_cash_award_mean().per_turn(player) << "/t  \t"
+			<< statistics.card_cash_award_mean().per_draw(player) << "/d\n";
 	}
+	std::cout << "\n";
 
-	std::cout << "Mean total card cash fees per game" << std::endl;
+	std::cout << "Mean card cash fees:\n";
 	for (auto const player : players) {
-		std::cout << "  Player " << player << ": " << statistics.card_cash_fee_mean_per_game(player) << std::endl;
+		std::cout << "  Player " << player << ":\t"
+			<< statistics.card_cash_fee_mean().per_game(player) << "/g  \t"
+			<< statistics.card_cash_fee_mean().per_turn(player) << "/t  \t"
+			<< statistics.card_cash_fee_mean().per_draw(player) << "/d\n";
 	}
+	std::cout << "\n";
+
+	std::cout << "Mean cards drawn:\n";
+	for (auto const player : players) {
+		std::cout << "  Player " << player << ":\t"
+			<< statistics.cards_drawn_mean().per_game(player) << "/g  \t"
+			<< statistics.cards_drawn_mean().per_turn(player) << "/t\n";
+	}
+	std::cout << "\n";
 }
 
 
