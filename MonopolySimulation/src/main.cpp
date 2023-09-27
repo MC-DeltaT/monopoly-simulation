@@ -1,6 +1,9 @@
+#include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <iostream>
+#include <numeric>
 #include <optional>
 #include <random>
 
@@ -30,11 +33,19 @@ void print_statistics() {
 	}
 	std::cout << "\n";
 
-	std::cout << "Board space frequencies:\n";
-	for (unsigned space = 0; space < board_space_count + 1; ++space) {
-		std::cout << "  Space " << space << ": " << statistics.board_space_relative_freq(space) << '\n';
+	{
+		std::cout << "Board space frequencies:\n";
+		auto rel_freqs = statistics.board_space_relative_freq();
+		std::array<unsigned, rel_freqs.size()> board_spaces;
+		std::iota(board_spaces.begin(), board_spaces.end(), 0u);
+		std::ranges::sort(board_spaces, [&rel_freqs](unsigned s1, unsigned s2) {
+			return rel_freqs[s1] > rel_freqs[s2];
+		});
+		for (auto const space : board_spaces) {
+			std::cout << "  Space " << space << ": " << rel_freqs[space] << '\n';
+		}
+		std::cout << "\n";
 	}
-	std::cout << "\n";
 
 	std::cout << "Mean times sent to jail:\n";
 	for (auto const player : players) {
@@ -63,7 +74,7 @@ void print_statistics() {
 		std::cout << "  Player " << player << ":\t"
 			<< statistics.card_cash_award_mean().per_game(player) << "/g  \t"
 			<< statistics.card_cash_award_mean().per_turn(player) << "/t  \t"
-			<< statistics.card_cash_award_mean().per_draw(player) << "/d\n";
+			<< statistics.card_cash_award_mean().per_card_draw(player) << "/c\n";
 	}
 	std::cout << "\n";
 
@@ -72,7 +83,7 @@ void print_statistics() {
 		std::cout << "  Player " << player << ":\t"
 			<< statistics.card_cash_fee_mean().per_game(player) << "/g  \t"
 			<< statistics.card_cash_fee_mean().per_turn(player) << "/t  \t"
-			<< statistics.card_cash_fee_mean().per_draw(player) << "/d\n";
+			<< statistics.card_cash_fee_mean().per_card_draw(player) << "/c\n";
 	}
 	std::cout << "\n";
 

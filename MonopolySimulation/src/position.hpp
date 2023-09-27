@@ -26,7 +26,7 @@ namespace monopoly {
 		}
 		else {
 			// Jail.
-			++statistics.board_space_counts[40];
+			++statistics.board_space_counts.back();
 		}
 		++statistics.position_count;
 	}
