@@ -8,7 +8,7 @@
 #include "player_strategy.hpp"
 #include "random.hpp"
 #include "rent_constants.hpp"
-#include "statistics.hpp"
+#include "statistics_counters.hpp"
 
 
 namespace monopoly {
@@ -92,10 +92,10 @@ namespace monopoly {
 			}
 			player_pay_player(game_state, strategies, random, player, *owner, rent);
 
-			statistics.rent_paid_total[player] += rent;
-			statistics.rent_received_total[*owner] += rent;
-			++statistics.rent_paid_count[player];
-			++statistics.rent_received_count[*owner];
+			stat_counters.rent_paid_total[player] += rent;
+			stat_counters.rent_received_total[*owner] += rent;
+			++stat_counters.rent_paid_count[player];
+			++stat_counters.rent_received_count[*owner];
 		}
 	}
 

@@ -10,7 +10,7 @@
 #include "player_strategy.hpp"
 #include "position.hpp"
 #include "random.hpp"
-#include "statistics.hpp"
+#include "statistics_counters.hpp"
 
 
 namespace monopoly {
@@ -67,7 +67,7 @@ namespace monopoly {
 		// Position starts negative and counts up to 0 each turn in jail.
 		constexpr auto in_jail_initial_position = -static_cast<int>(max_turns_in_jail);
 		update_position(game_state, player, in_jail_initial_position);
-		++statistics.sent_to_jail_count[player];
+		++stat_counters.sent_to_jail_count[player];
 	}
 
 }

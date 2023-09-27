@@ -40,7 +40,9 @@
     <ClInclude Include="src\random.hpp" />
     <ClInclude Include="src\rent.hpp" />
     <ClInclude Include="src\generic_sell_to_bank_iface.hpp" />
+    <ClInclude Include="src\simulation.hpp" />
     <ClInclude Include="src\statistics.hpp" />
+    <ClInclude Include="src\statistics_counters.hpp" />
     <ClInclude Include="src\turn_logic.hpp" />
     <ClInclude Include="src\safe_numeric.hpp" />
   </ItemGroup>

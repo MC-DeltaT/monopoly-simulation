@@ -11,7 +11,7 @@
 #include "property_query.hpp"
 #include "property_values.hpp"
 #include "safe_numeric.hpp"
-#include "statistics.hpp"
+#include "statistics_counters.hpp"
 
 
 namespace monopoly {
@@ -134,11 +134,11 @@ namespace monopoly {
 
 		auto const player_rankings = rank_players(game_state);
 		for (auto const player : players) {
-			statistics.player_rank_sum[player] += player_rankings[player];
+			stat_counters.player_rank_sum[player] += player_rankings[player];
 		}
 
 		for (auto const player : players) {
-			statistics.final_net_worth_sum[player] += net_worths[player];
+			stat_counters.final_net_worth_sum[player] += net_worths[player];
 		}
 	}
 

@@ -5,7 +5,7 @@
 
 #include "common_constants.hpp"
 #include "game_state.hpp"
-#include "statistics.hpp"
+#include "statistics_counters.hpp"
 
 
 namespace monopoly {
@@ -22,13 +22,13 @@ namespace monopoly {
 		game_state.turn.position_changed = true;
 
 		if (position >= 0) {
-			++statistics.board_space_counts[position];
+			++stat_counters.board_space_counts[position];
 		}
 		else {
 			// Jail.
-			++statistics.board_space_counts.back();
+			++stat_counters.board_space_counts.back();
 		}
-		++statistics.position_count;
+		++stat_counters.position_count;
 	}
 
 	// Advance the player's composition by a number of spaces relative to the current position.

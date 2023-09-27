@@ -37,6 +37,8 @@
     <ClInclude Include="src\property_values.hpp" />
     <ClInclude Include="src\rent_constants.hpp" />
     <ClInclude Include="src\static_vector.hpp" />
+    <ClInclude Include="src\statistics_counters.hpp" />
+    <ClInclude Include="src\simulation.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
