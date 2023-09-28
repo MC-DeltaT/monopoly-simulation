@@ -18,6 +18,7 @@ namespace monopoly::detail {
 
 	// Returns the actual cash amount a player has available to cover a payment.
 	// If the player doesn't have enough cash on hand, they will be forced to sell assets.
+	[[nodiscard]]
 	inline unsigned generate_debit_amount(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, unsigned const amount) {
 		auto const& player_cash = game_state.players[player].cash;

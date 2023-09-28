@@ -55,6 +55,7 @@
     <ClInclude Include="src\property_values.hpp" />
     <ClInclude Include="src\rent_constants.hpp" />
     <ClInclude Include="src\generic_sell_to_bank.hpp" />
+    <ClInclude Include="src\board_space_names.hpp" />
     <ClCompile Include="src\main.cpp" />
     <ClInclude Include="src\movement.hpp" />
     <ClInclude Include="src\property_auction.hpp" />

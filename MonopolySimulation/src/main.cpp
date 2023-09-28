@@ -5,6 +5,7 @@
 #include <numeric>
 #include <random>
 
+#include "board_space_names.hpp"
 #include "player_strategy.hpp"
 #include "random.hpp"
 #include "simulation.hpp"
@@ -85,7 +86,7 @@ void print_statistics() {
 			return rel_freqs[s1] > rel_freqs[s2];
 		});
 		for (auto const space : board_spaces) {
-			std::cout << "  Space " << space << ": " << rel_freqs[space] << '\n';
+			std::cout << "  " << rel_freqs[space] << ": " << board_position_name(space) << '\n';
 		}
 		std::cout << '\n';
 	}

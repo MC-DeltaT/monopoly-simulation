@@ -24,7 +24,7 @@ namespace monopoly {
 
 	// Gives the player the opportunity to buy an unowned property from the bank.
 	// Return value indicates if the property was purchased or not.
-	bool maybe_buy_unowned_property(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	inline bool maybe_buy_unowned_property(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, PropertyType auto const property) {
 		// TODO: allow the player to generate more cash to buy a property they otherwise can't afford.
 		auto const cost = property_buy_cost(property);

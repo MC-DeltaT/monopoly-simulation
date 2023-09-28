@@ -39,6 +39,7 @@
     <ClInclude Include="src\static_vector.hpp" />
     <ClInclude Include="src\statistics_counters.hpp" />
     <ClInclude Include="src\simulation.hpp" />
+    <ClInclude Include="src\board_space_names.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

@@ -20,7 +20,7 @@ namespace monopoly {
 		
 		switch (player_state.get_board_space()) {
 		case board_space_t::go:
-			board_effects::on_go_space(game_state, strategies, random, player);
+			board_effects::on_go_space();
 			break;
 		case board_space_t::old_kent_road:
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<0>(streets));
@@ -50,7 +50,7 @@ namespace monopoly {
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<4>(streets));
 			break;
 		case board_space_t::just_visiting_jail:
-			board_effects::on_just_visiting_jail(game_state, strategies, random, player);
+			board_effects::on_just_visiting_jail();
 			break;
 		case board_space_t::pall_mall:
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<5>(streets));
@@ -80,7 +80,7 @@ namespace monopoly {
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<10>(streets));
 			break;
 		case board_space_t::free_parking:
-			board_effects::on_free_parking(game_state, strategies, random, player);
+			board_effects::on_free_parking();
 			break;
 		case board_space_t::strand:
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<11>(streets));
@@ -110,7 +110,7 @@ namespace monopoly {
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<16>(streets));
 			break;
 		case board_space_t::go_to_jail:
-			board_effects::on_go_to_jail(game_state, strategies, random, player);
+			board_effects::on_go_to_jail(game_state, player);
 			break;
 		case board_space_t::regent_street:
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<17>(streets));

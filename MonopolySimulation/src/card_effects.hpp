@@ -82,13 +82,13 @@ namespace monopoly::card_effects {
 	inline void go_back_3_spaces(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		// Note that no Chance space would make it possible to go backwards past Go.
-		retreat_by_spaces(game_state, strategies, random, player, 3);
+		retreat_by_spaces(game_state, player, 3);
 		on_board_space(game_state, strategies, random, player);
 	}
 
 	inline void advance_to_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, board_space_t const space) {
-		monopoly::advance_to_space(game_state, strategies, random, player, space);
+		monopoly::advance_to_space(game_state, player, space);
 		on_board_space(game_state, strategies, random, player);
 	}
 
@@ -97,7 +97,7 @@ namespace monopoly::card_effects {
 		game_state.turn.railway_rent_multiplier = 2;
 		auto const current_space = game_state.players[player].get_board_space();
 		auto const next_railway = next_railway_lookup(current_space);
-		monopoly::advance_to_space(game_state, strategies, random, player, next_railway);
+		monopoly::advance_to_space(game_state, player, next_railway);
 		on_board_space(game_state, strategies, random, player);
 	}
 
@@ -106,7 +106,7 @@ namespace monopoly::card_effects {
 		game_state.turn.utility_rent_dice_multiplier_override = 10;
 		auto const current_space = game_state.players[player].get_board_space();
 		auto const next_utility = next_utility_lookup(current_space);
-		monopoly::advance_to_space(game_state, strategies, random, player, next_utility);
+		monopoly::advance_to_space(game_state, player, next_utility);
 		on_board_space(game_state, strategies, random, player);
 	}
 

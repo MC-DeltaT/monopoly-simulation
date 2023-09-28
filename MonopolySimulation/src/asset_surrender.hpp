@@ -35,7 +35,7 @@ namespace monopoly::detail {
 
 namespace monopoly {
 
-	void surrender_assets_to_bank(game_state_t& game_state, unsigned const player) {
+	inline void surrender_assets_to_bank(game_state_t& game_state, unsigned const player) {
 		// Should not have any buildings (they would be liquidated previously)
 		// Should not have unmortgaged properties (they would be liquidated previously)
 		// Might have mortgaged properties - streets, railways, utilities
@@ -64,7 +64,8 @@ namespace monopoly {
 		assert(game_state.players[player].cash == 0);
 	}
 
-	void surrender_assets_to_player(game_state_t& game_state, unsigned const src_player, unsigned const dst_player) {
+	inline void surrender_assets_to_player(game_state_t& game_state, unsigned const src_player,
+			unsigned const dst_player) {
 		// Should not have any buildings (they would be liquidated previously)
 		// Should not have unmortgaged properties (they would be liquidated previously)
 		// Might have mortgaged properties - streets, railways, utilities

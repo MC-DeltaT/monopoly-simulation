@@ -17,7 +17,7 @@
 namespace monopoly {
 
 	[[nodiscard]]
-	std::array<unsigned long long, player_count> player_net_worths(game_state_t const& game_state) {
+	inline std::array<unsigned long long, player_count> player_net_worths(game_state_t const& game_state) {
 		std::array<unsigned long long, player_count> net_worths{};
 
 		// Assume net worth consists of:
@@ -83,7 +83,7 @@ namespace monopoly {
 
 	// Computes the leaderboard rank for each player based on net worth.
 	[[nodiscard]]
-	std::array<unsigned, player_count> rank_players(game_state_t const& game_state) {
+	inline std::array<unsigned, player_count> rank_players(game_state_t const& game_state) {
 		auto const net_worths = player_net_worths(game_state);
 
 		// Returns true if player lhs ranks better than player rhs.
@@ -129,7 +129,7 @@ namespace monopoly {
 		return player_ranks;
 	}
 
-	void game_end_analysis(game_state_t const& game_state) {
+	inline void game_end_analysis(game_state_t const& game_state) {
 		auto const net_worths = player_net_worths(game_state);
 
 		auto const player_rankings = rank_players(game_state);

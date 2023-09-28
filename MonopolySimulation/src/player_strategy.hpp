@@ -28,12 +28,14 @@ namespace monopoly {
 		}
 
 		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, railway_t const railway) {
+		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
+				[[maybe_unused]] railway_t const railway) {
 			return _should_buy_unowned_property(game_state, random, railway_value);
 		}
 
 		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, utility_t const utility) {
+		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
+				[[maybe_unused]] utility_t const utility) {
 			return _should_buy_unowned_property(game_state, random, utility_value);
 		}
 
@@ -55,8 +57,8 @@ namespace monopoly {
 		}
 
 		[[nodiscard]]
-		sell_to_bank_choices_t choose_assets_for_forced_sale(game_state_t const& game_state, random_t& random,
-				unsigned const min_amount) {
+		sell_to_bank_choices_t choose_assets_for_forced_sale(game_state_t const& game_state,
+				[[maybe_unused]] random_t& random, unsigned const min_amount) {
 			// Sell in this order:
 			//   - Streets with no buildings, cheapest first;
 			//   - Utilities;

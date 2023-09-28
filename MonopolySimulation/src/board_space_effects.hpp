@@ -16,13 +16,13 @@
 
 namespace monopoly::board_effects {
 
-	void on_owned_property_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	inline void on_owned_property_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, PropertyType auto const property) {
 		pay_rent(game_state, strategies, random, player, property);
 		// Turn ends.
 	}
 
-	void on_unowned_property_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	inline void on_unowned_property_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, PropertyType auto const property) {
 		auto const bought = maybe_buy_unowned_property(game_state, strategies, random, player, property);
 		if (!bought) {
@@ -43,8 +43,7 @@ namespace monopoly::board_effects {
 	}
 
 
-	inline void on_go_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
-			unsigned const player) {
+	inline void on_go_space() {
 		// The Go salary is paid previously when the player lands on Go, so nothing is required here.
 		// Turn ends.
 	}
@@ -55,18 +54,15 @@ namespace monopoly::board_effects {
 		// Turn ends.
 	}
 
-	inline void on_free_parking(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
-			unsigned const player) {
+	inline void on_free_parking() {
 		// Turn ends.
 	}
 
-	inline void on_just_visiting_jail(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
-			unsigned const player) {
+	inline void on_just_visiting_jail() {
 		// Turn ends.
 	}
 
-	inline void on_go_to_jail(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
-			unsigned const player) {
+	inline void on_go_to_jail(game_state_t& game_state, unsigned const player) {
 		go_to_jail(game_state, player);
 		// Turn ends.
 	}

@@ -42,7 +42,7 @@ namespace monopoly {
 		}
 
 		game_state.turn.movement_roll = roll;
-		advance_by_spaces(game_state, strategies, random, player, roll);
+		advance_by_spaces(game_state, player, roll);
 		on_board_space(game_state, strategies, random, player);
 	}
 
@@ -112,7 +112,7 @@ namespace monopoly {
 		game_state.turn.movement_roll = roll;
 		// It's impossible to pass Go from jail.
 		assert(roll <= 12);
-		advance_by_spaces_no_go(game_state, strategies, random, player, roll);
+		advance_by_spaces_no_go(game_state, player, roll);
 		on_board_space(game_state, strategies, random, player);
 	}
 

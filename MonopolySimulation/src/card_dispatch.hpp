@@ -15,7 +15,7 @@ namespace monopoly {
 
 	inline void on_card(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, chance_card_t const card) {
-		auto const& player_state = game_state.players[player];
+		[[maybe_unused]] auto const& player_state = game_state.players[player];
 		assert(!player_state.is_bankrupt());
 		assert(!player_state.in_jail());
 
@@ -74,7 +74,7 @@ namespace monopoly {
 
 	inline void on_card(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, community_chest_card_t const card) {
-		auto const& player_state = game_state.players[player];
+		[[maybe_unused]] auto const& player_state = game_state.players[player];
 		assert(!player_state.is_bankrupt());
 		assert(!player_state.in_jail());
 

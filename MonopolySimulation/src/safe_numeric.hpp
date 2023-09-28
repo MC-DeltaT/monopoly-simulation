@@ -19,7 +19,7 @@ namespace monopoly {
 	template<std::unsigned_integral U1, std::unsigned_integral U2>
 	constexpr void safe_uint_add(U1& dst, U2 const add) {
 		assert(std::cmp_less_equal(std::uintmax_t{dst} + std::uintmax_t{add}, std::numeric_limits<U1>::max()));
-		auto const prev = dst;
+		[[maybe_unused]] auto const prev = dst;
 		dst += add;
 		assert(std::cmp_greater_equal(dst, prev));
 	}

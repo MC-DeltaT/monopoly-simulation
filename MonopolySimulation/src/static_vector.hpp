@@ -2,12 +2,13 @@
 
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <utility>
 
 
 namespace monopoly {
 
-	template<typename T, unsigned N> requires (N > 0)
+	template<std::semiregular T, unsigned N> requires (N > 0)
 	class static_vector {
 	public:
 		constexpr static_vector() :

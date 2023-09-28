@@ -15,7 +15,7 @@
 namespace monopoly {
 
 	// Runs a number of games for the purposes of collecting statistics.
-	void run_simulations(player_strategies_t& strategies, random_t& random, std::size_t const game_count,
+	inline void run_simulations(player_strategies_t& strategies, random_t& random, std::size_t const game_count,
 			std::optional<unsigned> const max_rounds = std::nullopt) {
 		game_state_t game_state;
 
