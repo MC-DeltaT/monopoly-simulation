@@ -92,10 +92,10 @@ namespace monopoly {
 			}
 			player_pay_player(game_state, strategies, random, player, *owner, rent);
 
-			stat_counters.rent_paid_total[player] += rent;
-			stat_counters.rent_received_total[*owner] += rent;
-			++stat_counters.rent_paid_count[player];
-			++stat_counters.rent_received_count[*owner];
+			stat_counters.rent_paid_amount[player] += rent;
+			stat_counters.rent_received_amount[*owner] += rent;
+			stat_counters.rent_paid_count[player]++;
+			stat_counters.rent_received_count[*owner]++;
 		}
 	}
 

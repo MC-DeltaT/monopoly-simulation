@@ -22,13 +22,12 @@ namespace monopoly {
 		game_state.turn.position_changed = true;
 
 		if (position >= 0) {
-			++stat_counters.board_space_counts[position];
+			stat_counters.board_space_counts[position]++;
 		}
 		else {
 			// Jail.
-			++stat_counters.board_space_counts.back();
+			stat_counters.board_space_counts.back()++;
 		}
-		++stat_counters.position_count;
 	}
 
 	// Advance the player's composition by a number of spaces relative to the current position.

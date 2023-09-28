@@ -86,7 +86,7 @@ namespace monopoly {
 					player_pay_bank(game_state, strategies, random, player, jail_release_cost);
 					// May have become bankrupt from paying get out of jail fee.
 					if (player_state.is_bankrupt()) {
-						stat_counters.jail_duration_total += max_turns_in_jail;
+						stat_counters.turns_in_jail[player] += max_turns_in_jail;
 						// Turn ends.
 						return;
 					}
@@ -103,7 +103,7 @@ namespace monopoly {
 
 		assert(player_state.position >= -static_cast<long>(max_turns_in_jail));
 		assert(player_state.position < 0);
-		stat_counters.jail_duration_total += player_state.position + static_cast<long>(max_turns_in_jail) + 1;
+		stat_counters.turns_in_jail[player] += player_state.position + static_cast<long>(max_turns_in_jail) + 1;
 
 		// Need to set position back to a normal board space first, since movement functions don't deal with moving
 		// directly from jail.
