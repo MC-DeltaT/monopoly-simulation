@@ -22,11 +22,11 @@ namespace monopoly {
 		game_state.turn.position_changed = true;
 
 		if (position >= 0) {
-			stat_counters.board_space_counts[position]++;
+			stat_counters.board_space_counts[player][position]++;
 		}
 		else {
 			// Jail.
-			stat_counters.board_space_counts.back()++;
+			stat_counters.board_space_counts[player].back()++;
 		}
 	}
 

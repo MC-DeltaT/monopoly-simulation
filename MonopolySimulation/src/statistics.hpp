@@ -53,13 +53,39 @@ namespace monopoly {
 		}
 		
 		[[nodiscard]]
-		std::array<double, board_space_count + 1> board_space_relative_frequencies() const {
-			auto const total = sum(c->board_space_counts);
+		std::array<double, board_space_count + 1> board_space_relative_frequencies(unsigned const player) const {
+			auto const total = sum(c->board_space_counts[player]);
 			std::array<double, board_space_count + 1> result{};
 			for (unsigned space = 0; space < result.size(); ++space) {
-				result[space] = div(c->board_space_counts[space], total);
+				result[space] = div(c->board_space_counts[player][space], total);
 			}
 			return result;
+		}
+
+		[[nodiscard]]
+		std::array<double, board_space_count + 1> board_space_relative_frequencies() const {
+			std::array<double, board_space_count + 1> overall_freqs{};
+			for (auto const& player_counts : c->board_space_counts) {
+				for (unsigned i = 0; i < board_space_count + 1; ++i) {
+					overall_freqs[i] += player_counts[i];
+				}
+			}
+			auto const total = sum(overall_freqs);
+			for (auto& count : overall_freqs) {
+				count /= total;
+			}
+			return overall_freqs;
+		}
+
+		[[nodiscard]]
+		std::array<double, board_space_count + 1> board_space_frequency_skew(unsigned const player) const {
+			auto const overall_freqs = board_space_relative_frequencies();
+			auto const player_total = sum(c->board_space_counts[player]);
+			std::array<double, board_space_count + 1> skews{};
+			for (unsigned i = 0; i < board_space_count + 1; ++i) {
+				skews[i] = div(c->board_space_counts[player][i], player_total) - overall_freqs[i];
+			}
+			return skews;
 		}
 		
 		[[nodiscard]]

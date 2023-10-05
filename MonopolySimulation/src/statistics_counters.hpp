@@ -48,7 +48,7 @@ namespace monopoly {
 		per_player_int_count rent_received_count{};
 
 		// Count of every time a player is on a space during their turn. Last entry is In Jail.
-		std::array<int_count, board_space_count + 1> board_space_counts{};
+		std::array<std::array<int_count, board_space_count + 1>, player_count> board_space_counts{};
 
 		// Number of times each player is sent to jail.
 		per_player_int_count sent_to_jail_count{};

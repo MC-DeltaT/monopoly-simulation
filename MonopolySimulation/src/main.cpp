@@ -1,9 +1,11 @@
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <ranges>
 
 #include "board_space_names.hpp"
 #include "player_strategy.hpp"
@@ -87,6 +89,25 @@ void print_statistics() {
 		});
 		for (auto const space : board_spaces) {
 			std::cout << "  " << rel_freqs[space] << ": " << board_position_name(space) << '\n';
+		}
+		std::cout << '\n';
+	}
+
+	{
+		std::cout << "Board space frequency skew:\n";
+		for (auto const player : players) {
+			std::cout << "  Player " << player << ":\n";
+			auto skews = statistics.board_space_frequency_skew(player);
+			std::array<unsigned, skews.size()> board_spaces;
+			std::iota(board_spaces.begin(), board_spaces.end(), 0u);
+			std::ranges::sort(board_spaces, [&skews](unsigned s1, unsigned s2) {
+				return std::abs(skews[s1]) > std::abs(skews[s2]);
+			});
+			for (auto const space : std::views::take(board_spaces, 5)) {
+				auto const skew = skews[space];
+				auto const sign = skew >= 0 ? "+" : "";
+				std::cout << "    " << sign << skew << ": " << board_position_name(space) << '\n';
+			}
 		}
 		std::cout << '\n';
 	}
