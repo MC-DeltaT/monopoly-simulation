@@ -31,7 +31,7 @@ namespace monopoly {
 		}
 		case generic_sell_to_bank_type::building:
 			// TODO
-			assert(false);
+			assert(false);	// Not implemented yet
 			break;
 		default:
 			assert(false);

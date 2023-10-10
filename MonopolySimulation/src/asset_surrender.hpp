@@ -28,6 +28,7 @@ namespace monopoly::detail {
 			game_state.property_ownership<P>().set_owner(property, dst_player);
 			// TODO: decide to unmortgage property or not
 			// TODO: if not unmortgage, pay interest
+			assert(false);	// Not implemented yet
 		}
 	}
 

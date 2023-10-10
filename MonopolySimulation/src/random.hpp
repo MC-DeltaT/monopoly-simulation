@@ -57,6 +57,11 @@ namespace monopoly {
 		}
 
 		[[nodiscard]]
+		constexpr bool biased_bool(float const true_probability) noexcept {
+			return unit_float() < true_probability;
+		}
+
+		[[nodiscard]]
 		static constexpr std::uint64_t min() noexcept { return 1; }
 
 		[[nodiscard]]

@@ -101,8 +101,8 @@ namespace monopoly {
 			}
 		}
 
-		assert(player_state.position >= -static_cast<long>(max_turns_in_jail));
-		assert(player_state.position < 0);
+		assert(std::cmp_greater_equal(player_state.position, -static_cast<long>(max_turns_in_jail)));
+		assert(std::cmp_less(player_state.position, 0));
 		stat_counters.turns_in_jail[player] += player_state.position + static_cast<long>(max_turns_in_jail) + 1;
 
 		// Need to set position back to a normal board space first, since movement functions don't deal with moving
