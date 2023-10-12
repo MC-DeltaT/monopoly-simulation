@@ -503,4 +503,10 @@ namespace monopoly {
 		game_state_t& operator=(game_state_t const&) = default;
 	};
 
+
+	struct auction_state_t {
+		// 0 represents "no bid" since cannot buy a property for $0.
+		std::array<unsigned, player_count> bids{};
+	};
+
 }
