@@ -61,9 +61,10 @@ namespace monopoly {
 
 		std::optional<card_type_t> used_get_out_of_jail_free_card;
 		if (game_state.get_out_of_jail_free_ownership.owns_any(player)) {
-			used_get_out_of_jail_free_card = strategies.visit(player, [&game_state, &random](auto& strategy) {
-				return strategy.should_use_get_out_of_jail_free(game_state, random);
-			});
+			used_get_out_of_jail_free_card = strategies.visit(player,
+				[&game_state, &random](PlayerStrategy auto& strategy) {
+					return strategy.should_use_get_out_of_jail_free(game_state, random);
+				});
 		}
 
 		unsigned roll;

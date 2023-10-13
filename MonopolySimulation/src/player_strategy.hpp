@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <concepts>
 #include <optional>
 #include <tuple>
 #include <utility>
@@ -20,13 +21,48 @@ namespace monopoly {
 	using sell_to_bank_choices_t = static_vector<generic_sell_to_bank_t, 8>;
 
 
+	template<typename T>
+	concept PlayerStrategy = requires (T t, game_state_t const game, random_t random,
+			auction_state_t const auction, street_t const street, railway_t const railway, utility_t const utility,
+			unsigned const u) {
+		// Decides if the player should purchase an unowned property they have landed on.
+		// Will only be called if the player has enough cash to buy the property.
+		{ t.should_buy_unowned_property(game, random, street) } -> std::same_as<bool>;
+		{ t.should_buy_unowned_property(game, random, railway) } -> std::same_as<bool>;
+		{ t.should_buy_unowned_property(game, random, utility) } -> std::same_as<bool>;
+
+		// Places a bid on an unowned property up for auction.
+		// Bids that the player cannot afford or don't improve their previous bid are ignored.
+		{ t.bid_on_unowned_property(game, random, street, auction) } -> std::same_as<unsigned>;
+		{ t.bid_on_unowned_property(game, random, railway, auction) } -> std::same_as<unsigned>;
+		{ t.bid_on_unowned_property(game, random, utility, auction) } -> std::same_as<unsigned>;
+
+		// Picks a Get Out Of Jail Free card to use, if any.
+		// Will only be called if the player owns at least one card. Must not return an unowned card.
+		{ t.should_use_get_out_of_jail_free(game, random) } -> std::same_as<std::optional<card_type_t>>;
+
+		// Pick assets to sell to generate the specified amount of cash. Assets will be sold in order.
+		// Must not pick assets that the player doesn't own or are unsellable.
+		// Must not return nothing if the player has sellable assets.
+		{ t.choose_assets_for_forced_sale(game, random, u) } -> std::same_as<sell_to_bank_choices_t>;
+	};
+
+
 	struct test_player_strategy_t {
 		unsigned player;
 
 		[[nodiscard]]
 		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
 				PropertyType auto const property) {
-			return _should_buy_unowned_property(game_state, random, property_buy_cost(property));
+			// If the player has enough money, 50% chance of buying.
+			auto const property_value = property_buy_cost(property);
+			auto const player_cash = game_state.players[player].cash;
+			if (property_value > player_cash) {
+				return false;
+			}
+			else {
+				return random.uniform_bool();
+			}
 		}
 
 		[[nodiscard]]
@@ -34,9 +70,9 @@ namespace monopoly {
 				auction_state_t const& auction) {
 			// Randomly pay value +/- up to 50%.
 			if (auction.bids[player] == 0) {
-				auto const value = property_buy_cost(property);
+				auto const property_value = property_buy_cost(property);
 				auto const adjust = random.unit_float() - 0.5;
-				auto const bid = static_cast<unsigned>(value * (1 + adjust));
+				auto const bid = static_cast<unsigned>(property_value * (1 + adjust));
 				return bid;
 			}
 			else {
@@ -72,7 +108,7 @@ namespace monopoly {
 			
 			sell_to_bank_choices_t choices;
 
-			long amount_remaining = min_amount;
+			long long amount_remaining = min_amount;
 
 			for (auto const& street : streets) {
 				if (game_state.street_ownership.is_owner(player, street) && is_property_sellable(game_state, street)) {
@@ -113,20 +149,6 @@ namespace monopoly {
 			// TODO: buildings
 
 			return choices;
-		}
-
-	private:
-		[[nodiscard]]
-		bool _should_buy_unowned_property(game_state_t const& game_state, random_t& random,
-				unsigned const property_value) {
-			// If the player has enough money, 50% chance of buying.
-			auto const player_cash = game_state.players[player].cash;
-			if (property_value > player_cash) {
-				return false;
-			}
-			else {
-				return random.uniform_bool();
-			}
 		}
 	};
 
@@ -171,26 +193,8 @@ namespace monopoly {
 
 		[[nodiscard]]
 		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, unsigned const player,
-				street_t const street) const {
-			return _should_buy_unowned_property(game_state, random, player, street_values[street.global_index]);
-		}
-
-		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, unsigned const player,
-				[[maybe_unused]] railway_t const railway) const {
-			return _should_buy_unowned_property(game_state, random, player, railway_value);
-		}
-
-		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, unsigned const player,
-				[[maybe_unused]] utility_t const utility) const {
-			return _should_buy_unowned_property(game_state, random, player, utility_value);
-		}
-
-	private:
-		[[nodiscard]]
-		bool _should_buy_unowned_property(game_state_t const& game_state, random_t& random, unsigned const player,
-				unsigned const property_value) const {
+				PropertyType auto const property) const {
+			auto const property_value = property_buy_cost(property);
 			auto const player_cash = game_state.players[player].cash;
 			if (player_cash >= property_value) {
 				auto const buy = random.biased_bool(buy_probability);
@@ -213,7 +217,7 @@ namespace monopoly {
 				unsigned const player, unsigned const min_amount) const {
 			sell_to_bank_choices_t choices;
 
-			long amount_remaining = min_amount;
+			long long amount_remaining = min_amount;
 
 			for (auto const& street : streets) {
 				if (game_state.street_ownership.is_owner(player, street) && is_property_sellable(game_state, street)) {

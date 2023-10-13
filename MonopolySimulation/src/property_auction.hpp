@@ -19,6 +19,7 @@ namespace monopoly {
 		//   - Players are queried for their bids in a round robin fashion.
 		//   - Players may not lower their bids (as this would allow for price manipulation).
 		//   - Players may not bid higher than they have cash on hand.
+		//   - Players may not remove their bids once placed.
 		//   - The auction ends when there is a round where no player changes their bid.
 		//   - If multiple players have bid the same price, the property is not sold.
 
@@ -29,7 +30,7 @@ namespace monopoly {
 			for (auto const player : players) {
 				auto const old_bid = auction_state.bids[player];
 				auto const new_bid = strategies.visit(player,
-					[&game_state, &random, &auction_state, property](auto& strategy) {
+					[&game_state, &random, &auction_state, property](PlayerStrategy auto& strategy) {
 						return strategy.bid_on_unowned_property(game_state, random, property, auction_state);
 					});
 				auto const bid_improved = new_bid > old_bid;

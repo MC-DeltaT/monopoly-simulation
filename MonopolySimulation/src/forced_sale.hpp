@@ -17,9 +17,10 @@ namespace monopoly {
 		auto const cash_required = player_cash + min_amount;
 		assert(min_amount > 0);
 		while (true) {
-			auto const sell_choices = strategies.visit(player, [&game_state, &random, min_amount](auto& strategy) {
-				return strategy.choose_assets_for_forced_sale(game_state, random, min_amount);
-			});
+			auto const sell_choices = strategies.visit(player,
+				[&game_state, &random, min_amount](PlayerStrategy auto& strategy) {
+					return strategy.choose_assets_for_forced_sale(game_state, random, min_amount);
+				});
 			
 			if (sell_choices.empty()) {
 				break;
@@ -27,10 +28,9 @@ namespace monopoly {
 
 			for (auto const& sell : sell_choices) {
 				generic_sell_to_bank(game_state, player, sell);
-			}
-
-			if (player_cash >= cash_required) {
-				break;
+				if (player_cash >= cash_required) {
+					break;
+				}
 			}
 		}
 	}

@@ -29,7 +29,7 @@ namespace monopoly {
 		// TODO: allow the player to generate more cash to buy a property they otherwise can't afford.
 		auto const cost = property_buy_cost(property);
 		if (cost <= game_state.players[player].cash) {
-			auto const buy = strategies.visit(player, [&game_state, &random, property](auto& strategy) {
+			auto const buy = strategies.visit(player, [&game_state, &random, property](PlayerStrategy auto& strategy) {
 				return strategy.should_buy_unowned_property(game_state, random, property);
 			});
 			if (buy) {
