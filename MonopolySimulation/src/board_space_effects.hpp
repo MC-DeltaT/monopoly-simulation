@@ -34,7 +34,7 @@ namespace monopoly::board_effects {
 	template<PropertyType P>
 	void on_property_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, P const property) {
-		if (game_state.property_ownership<P>().is_owned(property)) {
+		if (game_state.property_ownership.get<P>().is_owned(property)) {
 			on_owned_property_space(game_state, strategies, random, player, property);
 		}
 		else {

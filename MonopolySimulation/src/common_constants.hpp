@@ -13,6 +13,8 @@ namespace monopoly {
 
 	inline constexpr unsigned board_space_count = 40;
 
+	inline constexpr unsigned street_count = 22;
+
 	inline constexpr unsigned railway_count = 4;
 
 	inline constexpr unsigned utility_count = 2;

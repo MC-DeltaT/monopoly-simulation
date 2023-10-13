@@ -12,6 +12,11 @@ namespace monopoly {
 		unsigned global_index;
 		unsigned colour_set;
 		unsigned index_in_set;
+
+		[[nodiscard]]
+		constexpr operator unsigned() const noexcept {
+			return global_index;
+		}
 	};
 
 	enum class railway_t : unsigned;

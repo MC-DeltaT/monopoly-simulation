@@ -48,111 +48,6 @@ namespace monopoly {
 	};
 
 
-	struct test_player_strategy_t {
-		unsigned player;
-
-		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
-				PropertyType auto const property) {
-			// If the player has enough money, 50% chance of buying.
-			auto const property_value = property_buy_cost(property);
-			auto const player_cash = game_state.players[player].cash;
-			if (property_value > player_cash) {
-				return false;
-			}
-			else {
-				return random.uniform_bool();
-			}
-		}
-
-		[[nodiscard]]
-		unsigned bid_on_unowned_property(game_state_t const&, random_t& random, PropertyType auto const property,
-				auction_state_t const& auction) {
-			// Randomly pay value +/- up to 50%.
-			if (auction.bids[player] == 0) {
-				auto const property_value = property_buy_cost(property);
-				auto const adjust = random.unit_float() - 0.5;
-				auto const bid = static_cast<unsigned>(property_value * (1 + adjust));
-				return bid;
-			}
-			else {
-				return 0;
-			}
-		}
-
-		[[nodiscard]]
-		std::optional<card_type_t> should_use_get_out_of_jail_free(game_state_t const& game_state, random_t& random) {
-			assert(game_state.get_out_of_jail_free_ownership.owns_any(player));
-			// 50% chance of using the first card (and 50% chance of trying to roll doubles).
-			if (random.uniform_bool()) {
-				if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
-					return card_type_t::chance;
-				}
-				else {
-					// This function shouldn't be called unless the player owns at least 1 card.
-					assert(game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest));
-					return card_type_t::community_chest;
-				}
-			}
-			return std::nullopt;
-		}
-
-		[[nodiscard]]
-		sell_to_bank_choices_t choose_assets_for_forced_sale(game_state_t const& game_state,
-				[[maybe_unused]] random_t& random, unsigned const min_amount) {
-			// Sell in this order:
-			//   - Streets with no buildings, cheapest first;
-			//   - Utilities;
-			//   - Railways;
-			//   - Buildings, cheapest first.
-			
-			sell_to_bank_choices_t choices;
-
-			long long amount_remaining = min_amount;
-
-			for (auto const& street : streets) {
-				if (game_state.street_ownership.is_owner(player, street) && is_property_sellable(game_state, street)) {
-					choices.push_back(generic_sell_to_bank_t{generic_sell_to_bank_type::street, street.global_index});
-					amount_remaining -= property_sell_value(street);
-					if (amount_remaining <= 0) {
-						break;
-					}
-				}
-			}
-
-			if (amount_remaining > 0) {
-				for (auto const utility : utilities) {
-					if (game_state.utility_ownership.is_owner(player, utility)
-							&& is_property_sellable(game_state, utility)) {
-						choices.emplace_back(generic_sell_to_bank_type::utility, static_cast<unsigned>(utility));
-						amount_remaining -= utility_sell_value;
-						if (amount_remaining <= 0) {
-							break;
-						}
-					}
-				}
-			}
-
-			if (amount_remaining > 0) {
-				for (auto const railway : railways) {
-					if (game_state.railway_ownership.is_owner(player, railway)
-							&& is_property_sellable(game_state, railway)) {
-						choices.emplace_back(generic_sell_to_bank_type::railway, static_cast<unsigned>(railway));
-						amount_remaining -= railway_sell_value;
-						if (amount_remaining <= 0) {
-							break;
-						}
-					}
-				}
-			}
-
-			// TODO: buildings
-
-			return choices;
-		}
-	};
-
-
 	// Always use Get Out Of Jail Free (if the player has one) after a fixed number of turns in jail.
 	struct turn_based_jail_strategy_t {
 		// Turn in jail on which to use Get Out Of Jail Free card.
@@ -188,7 +83,6 @@ namespace monopoly {
 
 	// Fixed probability of buying a property if the player can afford it.
 	struct random_unowned_property_buy_strategy_t {
-	public:
 		float buy_probability;
 
 		[[nodiscard]]
@@ -201,6 +95,34 @@ namespace monopoly {
 				return buy;
 			}
 			return false;
+		}
+	};
+
+
+	// Bid amount uniformly distributed around property price.
+	struct random_unowned_property_bid_strategy_t {
+		// mean(bid) = property_price * (1 + centre_adjust)
+		// min(bid) = mean(bid) - width * property_price / 2
+		// max(bid) = mean(bid) + width * property_price / 2
+
+		float centre_adjust;	// As a fraction of the property price.
+		float width;	// As a fraction of the property price.
+
+		[[nodiscard]]
+		unsigned bid_on_unowned_property(game_state_t const&, random_t& random, unsigned const player,
+				PropertyType auto const property, auction_state_t const& auction) const {
+			if (auction.bids[player] == 0) {
+				auto const property_price = property_buy_cost(property);
+				auto const width_abs = property_price * width;
+				auto const mean = property_price * (1 + centre_adjust);
+				auto const min = mean - width_abs / 2;
+				auto const r = random.unit_float();
+				auto const bid = r * width_abs + min;
+				return static_cast<unsigned>(bid);
+			}
+			else {
+				return 0;
+			}
 		}
 	};
 
@@ -220,7 +142,9 @@ namespace monopoly {
 			long long amount_remaining = min_amount;
 
 			for (auto const& street : streets) {
-				if (game_state.street_ownership.is_owner(player, street) && is_property_sellable(game_state, street)) {
+				auto const can_sell = game_state.property_ownership.street.is_owner(player, street)
+					&& is_property_sellable(game_state, street);
+				if (can_sell) {
 					choices.push_back(generic_sell_to_bank_t{generic_sell_to_bank_type::street, street.global_index});
 					amount_remaining -= property_sell_value(street);
 					if (amount_remaining <= 0) {
@@ -231,8 +155,9 @@ namespace monopoly {
 
 			if (amount_remaining > 0) {
 				for (auto const utility : utilities) {
-					if (game_state.utility_ownership.is_owner(player, utility)
-							&& is_property_sellable(game_state, utility)) {
+					auto const can_sell = game_state.property_ownership.utility.is_owner(player, utility)
+						&& is_property_sellable(game_state, utility);
+					if (can_sell) {
 						choices.emplace_back(generic_sell_to_bank_type::utility, static_cast<unsigned>(utility));
 						amount_remaining -= utility_sell_value;
 						if (amount_remaining <= 0) {
@@ -244,8 +169,9 @@ namespace monopoly {
 
 			if (amount_remaining > 0) {
 				for (auto const railway : railways) {
-					if (game_state.railway_ownership.is_owner(player, railway)
-							&& is_property_sellable(game_state, railway)) {
+					auto const can_sell = game_state.property_ownership.railway.is_owner(player, railway)
+						&& is_property_sellable(game_state, railway);
+					if (can_sell) {
 						choices.emplace_back(generic_sell_to_bank_type::railway, static_cast<unsigned>(railway));
 						amount_remaining -= railway_sell_value;
 						if (amount_remaining <= 0) {
@@ -262,23 +188,63 @@ namespace monopoly {
 	};
 
 
-	template<auto JailStrategy, auto UnownedPropertyBuyStrategy, auto ForcedSaleStrategy> 
+	struct test_player_strategy_t {
+		unsigned player;
+
+		[[nodiscard]]
+		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
+				PropertyType auto const property) {
+			random_unowned_property_buy_strategy_t strategy{0.5};
+			return strategy.should_buy_unowned_property(game_state, random, player, property);
+		}
+
+		[[nodiscard]]
+		unsigned bid_on_unowned_property(game_state_t const& game_state, random_t& random,
+				PropertyType auto const property, auction_state_t const& auction) {
+			random_unowned_property_bid_strategy_t strategy{0, 1.0};
+			return strategy.bid_on_unowned_property(game_state, random, player, property, auction);
+		}
+
+		[[nodiscard]]
+		std::optional<card_type_t> should_use_get_out_of_jail_free(game_state_t const& game_state, random_t& random) {
+			assert(game_state.get_out_of_jail_free_ownership.owns_any(player));
+			// 50% chance of using the first card (and 50% chance of trying to roll doubles).
+			if (random.uniform_bool()) {
+				if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
+					return card_type_t::chance;
+				}
+				else {
+					// This function shouldn't be called unless the player owns at least 1 card.
+					assert(game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest));
+					return card_type_t::community_chest;
+				}
+			}
+			return std::nullopt;
+		}
+
+		[[nodiscard]]
+		sell_to_bank_choices_t choose_assets_for_forced_sale(game_state_t const& game_state,
+				[[maybe_unused]] random_t& random, unsigned const min_amount) {
+			return basic_forced_sale_strategy_t{}.choose_assets_for_forced_sale(game_state, random, player, min_amount);
+		}
+	};
+
+
+	template<
+		auto JailStrategy, auto UnownedPropertyBuyStrategy, auto UnownedPropertyBidStrategy, auto ForcedSaleStrategy> 
 	struct flexible_player_strategy_t {
 		unsigned player;
 
 		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, street_t const street) {
-			return UnownedPropertyBuyStrategy.should_buy_unowned_property(game_state, random, player, street);
+		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
+				PropertyType auto const property) {
+			return UnownedPropertyBuyStrategy.should_buy_unowned_property(game_state, random, player, property);
 		}
 
 		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, railway_t const railway) {
-			return UnownedPropertyBuyStrategy.should_buy_unowned_property(game_state, random, player, railway);
-		}
-
-		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, utility_t const utility) {
-			return UnownedPropertyBuyStrategy.should_buy_unowned_property(game_state, random, player, utility);
+		unsigned bid_on_unowned_property(game_state_t const& game_state, random_t& random,
+				PropertyType auto const property, auction_state_t const& auction) {
+			return UnownedPropertyBidStrategy.bid_on_unowned_property(game_state, random, player, property, auction);
 		}
 
 		[[nodiscard]]
@@ -296,23 +262,27 @@ namespace monopoly {
 
 	struct player_strategies_t {
 		std::tuple<
-			/*flexible_player_strategy_t<
+			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
 				random_unowned_property_buy_strategy_t{0.2},
+				random_unowned_property_bid_strategy_t{-0.4, 1.2},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
 				random_unowned_property_buy_strategy_t{0.2},
+				random_unowned_property_bid_strategy_t{-0.4, 1.2},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
 				random_unowned_property_buy_strategy_t{0.2},
+				random_unowned_property_bid_strategy_t{-0.4, 1.2},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
 				random_unowned_property_buy_strategy_t{0.2},
-				basic_forced_sale_strategy_t{}>*/
-			test_player_strategy_t, test_player_strategy_t, test_player_strategy_t, test_player_strategy_t
+				random_unowned_property_bid_strategy_t{-0.4, 1.2},
+				basic_forced_sale_strategy_t{}>
+			//test_player_strategy_t, test_player_strategy_t, test_player_strategy_t, test_player_strategy_t
 		> strategies{{0}, {1}, {2}, {3}};
 
 		player_strategies_t() = default;

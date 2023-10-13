@@ -3,6 +3,8 @@
 #include <array>
 
 #include "common_constants.hpp"
+#include "property_constants.hpp"
+#include "per_propertytype_data.hpp"
 
 
 namespace monopoly {
@@ -28,7 +30,7 @@ namespace monopoly {
 		// This includes all turns (including in jail) when the player is not bankrupt.
 		per_player_int_count turns_played{};
 
-		// Sum of end game ranks for each player.
+		// (Sum of) end game ranks for each player.
 		// 0 = first place, to player_count-1 = last place
 		per_player_int_count player_rank{};
 
@@ -71,8 +73,36 @@ namespace monopoly {
 
 		// Number of cash fee cards drawn, for each player.
 		per_player_int_count cash_fee_cards_drawn{};
+
+		// Number of games a property was purchased from the back at least once.
+		per_propertytype_data<
+			std::array<int_count, street_count>,
+			std::array<int_count, railway_count>,
+			std::array<int_count, utility_count>
+		> property_purchased_at_least_once{};
+		
+		// (Sum of) round a property is first purchased from the bank.
+		per_propertytype_data<
+			std::array<int_count, street_count>,
+			std::array<int_count, railway_count>,
+			std::array<int_count, utility_count>
+		> property_first_purchase_round{};
 	};
 
 	inline stat_counters_t stat_counters{};
+
+
+	// Per-game state needed for tracking statistics.
+	// Reset st the start of each game.
+	struct stat_helper_state_t {
+		// Indicates if each property has been purchased from the bank yet. Once true, remains true.
+		per_propertytype_data<
+			std::array<bool, street_count>,
+			std::array<bool, railway_count>,
+			std::array<bool, utility_count>
+		> property_has_been_purchased{};
+	};
+
+	inline stat_helper_state_t stat_helper_state{};
 
 }

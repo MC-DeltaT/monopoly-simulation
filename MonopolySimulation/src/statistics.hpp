@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "common_constants.hpp"
+#include "common_types.hpp"
 #include "statistics_counters.hpp"
 
 
@@ -151,6 +152,17 @@ namespace monopoly {
 		[[nodiscard]]
 		double avg_cash_fee_card_amount_per_game(unsigned const player) const {
 			return div(c->cash_fee_card_amount[player], c->games);
+		}
+
+		template<PropertyType P>
+		[[nodiscard]]
+		auto avg_property_first_purchase_round() const {
+			auto const sum = c->property_first_purchase_round.get<P>();
+			std::array<double, sum.size()> result{};
+			for (std::size_t i = 0; i < result.size(); ++i) {
+				result[i] = div(sum[i], c->property_purchased_at_least_once.get<P>()[i]);
+			}
+			return result;
 		}
 
 	private:

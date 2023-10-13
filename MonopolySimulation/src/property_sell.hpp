@@ -14,10 +14,10 @@ namespace monopoly {
 
 	template<PropertyType P>
 	void sell_property_to_bank(game_state_t& game_state, unsigned const player, P const property) {
-		assert(game_state.property_ownership<P>().is_owner(player, property));
+		assert(game_state.property_ownership.get<P>().is_owner(player, property));
 		assert(is_property_sellable(game_state, property));
 
-		game_state.property_ownership<P>().set_owner(property, std::nullopt);
+		game_state.property_ownership.get<P>().set_owner(property, std::nullopt);
 		bank_pay_player(game_state, player, property_sell_value(property));
 	}
 

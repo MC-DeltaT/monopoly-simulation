@@ -38,7 +38,7 @@ namespace monopoly {
 
 		// Streets and buildings.
 		for (auto const& street : streets) {
-			if (auto const owner = game_state.street_ownership.get_owner(street); owner.has_value()) {
+			if (auto const owner = game_state.property_ownership.street.get_owner(street); owner.has_value()) {
 				if (game_state.street_development.is_mortgaged(street)) {
 					safe_uint_add(net_worths[*owner], property_mortgage_value(street));
 				}
@@ -54,7 +54,7 @@ namespace monopoly {
 
 		// Railways.
 		for (auto const railway : railways) {
-			if (auto const owner = game_state.railway_ownership.get_owner(railway); owner.has_value()) {
+			if (auto const owner = game_state.property_ownership.railway.get_owner(railway); owner.has_value()) {
 				auto const value =
 					game_state.railway_development.is_mortgaged(railway) ? railway_mortgage_value : railway_value;
 				safe_uint_add(net_worths[*owner], value);
@@ -63,7 +63,7 @@ namespace monopoly {
 
 		// Utilities.
 		for (auto const utility : utilities) {
-			if (auto const owner = game_state.utility_ownership.get_owner(utility); owner.has_value()) {
+			if (auto const owner = game_state.property_ownership.utility.get_owner(utility); owner.has_value()) {
 				auto const value =
 					game_state.utility_development.is_mortgaged(utility) ? utility_mortgage_value : utility_value;
 				safe_uint_add(net_worths[*owner], value);

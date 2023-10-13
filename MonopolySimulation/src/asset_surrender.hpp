@@ -12,20 +12,20 @@ namespace monopoly::detail {
 
 	template<PropertyType P>
 	void surrender_property_to_bank(game_state_t& game_state, unsigned const player, P const property) {
-		if (game_state.property_ownership<P>().is_owner(player, property)) {
+		if (game_state.property_ownership.get<P>().is_owner(player, property)) {
 			// If property isn't mortgaged then it should've been liquidated previously.
-			assert(game_state.property_development<P>().is_mortgaged(property));
-			game_state.property_ownership<P>().set_owner(property, std::nullopt);
+			assert(game_state.property_development.get<P>().is_mortgaged(property));
+			game_state.property_ownership.get<P>().set_owner(property, std::nullopt);
 		}
 	}
 
 	template<PropertyType P>
 	void surrender_property_to_player(game_state_t& game_state, unsigned const src_player, P const property,
 			unsigned const dst_player) {
-		if (game_state.property_ownership<P>().is_owner(src_player, property)) {
+		if (game_state.property_ownership.get<P>().is_owner(src_player, property)) {
 			// If property isn't mortgaged then it should've been liquidated previously.
-			assert(game_state.property_development<P>().is_mortgaged(property));
-			game_state.property_ownership<P>().set_owner(property, dst_player);
+			assert(game_state.property_development.get<P>().is_mortgaged(property));
+			game_state.property_ownership.get<P>().set_owner(property, dst_player);
 			// TODO: decide to unmortgage property or not
 			// TODO: if not unmortgage, pay interest
 			assert(false);	// Not implemented yet

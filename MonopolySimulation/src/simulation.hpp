@@ -21,6 +21,7 @@ namespace monopoly {
 
 		auto const start_time = std::chrono::steady_clock::now();
 		for (std::size_t g = 0; g < game_count; ++g) {
+			stat_helper_state = stat_helper_state_t{};
 			run_new_game(game_state, strategies, random, max_rounds);
 			game_end_analysis(game_state);
 		}

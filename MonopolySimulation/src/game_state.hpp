@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <limits>
 #include <numeric>
@@ -13,6 +12,7 @@
 #include "common_constants.hpp"
 #include "common_types.hpp"
 #include "gameplay_constants.hpp"
+#include "per_propertytype_data.hpp"
 #include "property_constants.hpp"
 #include "safe_numeric.hpp"
 
@@ -441,9 +441,8 @@ namespace monopoly {
 
 	struct game_state_t {
 		std::array<player_state_t, player_count> players;
-		street_ownership_t street_ownership;
-		railway_ownership_t railway_ownership;
-		utility_ownership_t utility_ownership;
+		per_propertytype_data<street_ownership_t, railway_ownership_t, utility_ownership_t> property_ownership;
+		per_propertytype_data<street_development_t, railway_development_t, utility_development_t> property_development;
 		street_development_t street_development;
 		railway_development_t railway_development;
 		utility_development_t utility_development;
@@ -457,34 +456,6 @@ namespace monopoly {
 
 		game_state_t() = default;
 		game_state_t& operator=(game_state_t&&) = default;
-
-		template<PropertyType P>
-		[[nodiscard]]
-		constexpr auto& property_ownership() noexcept {
-			if constexpr (std::same_as<P, street_t>) {
-				return street_ownership;
-			}
-			else if constexpr (std::same_as<P, railway_t>) {
-				return railway_ownership;
-			}
-			else if constexpr (std::same_as<P, utility_t>) {
-				return utility_ownership;
-			}
-		}
-
-		template<PropertyType P>
-		[[nodiscard]]
-		constexpr auto& property_development() noexcept {
-			if constexpr (std::same_as<P, street_t>) {
-				return street_development;
-			}
-			else if constexpr (std::same_as<P, railway_t>) {
-				return railway_development;
-			}
-			else if constexpr (std::same_as<P, utility_t>) {
-				return utility_development;
-			}
-		}
 
 		template<card_type_t C>
 		[[nodiscard]]
@@ -505,7 +476,7 @@ namespace monopoly {
 
 
 	struct auction_state_t {
-		// 0 represents "no bid" since cannot buy a property for $0.
+		// 0 represents "no bid", since cannot buy a property for $0.
 		std::array<unsigned, player_count> bids{};
 	};
 

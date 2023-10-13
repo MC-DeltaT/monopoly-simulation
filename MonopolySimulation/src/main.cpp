@@ -1,13 +1,13 @@
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstddef>
 #include <iostream>
-#include <numeric>
 #include <random>
 #include <ranges>
 
+#include "algorithm.hpp"
 #include "board_space_names.hpp"
+#include "common_types.hpp"
 #include "player_strategy.hpp"
 #include "random.hpp"
 #include "simulation.hpp"
@@ -81,13 +81,9 @@ void print_statistics() {
 
 	{
 		std::cout << "Board space frequencies:\n";
-		auto rel_freqs = statistics.board_space_relative_frequencies();
-		std::array<unsigned, rel_freqs.size()> board_spaces;
-		std::iota(board_spaces.begin(), board_spaces.end(), 0u);
-		std::ranges::sort(board_spaces, [&rel_freqs](unsigned s1, unsigned s2) {
-			return rel_freqs[s1] > rel_freqs[s2];
-		});
-		for (auto const space : board_spaces) {
+		auto const rel_freqs = statistics.board_space_relative_frequencies();
+		auto const board_spaces = sorted_indices(rel_freqs);
+		for (auto const space : board_spaces | std::views::reverse) {
 			std::cout << "  " << rel_freqs[space] << ": " << board_position_name(space) << '\n';
 		}
 		std::cout << '\n';
@@ -97,17 +93,23 @@ void print_statistics() {
 		std::cout << "Board space frequency skew:\n";
 		for (auto const player : players) {
 			std::cout << "  Player " << player << ":\n";
-			auto skews = statistics.board_space_frequency_skew(player);
-			std::array<unsigned, skews.size()> board_spaces;
-			std::iota(board_spaces.begin(), board_spaces.end(), 0u);
-			std::ranges::sort(board_spaces, [&skews](unsigned s1, unsigned s2) {
-				return std::abs(skews[s1]) > std::abs(skews[s2]);
-			});
-			for (auto const space : std::views::take(board_spaces, 5)) {
+			auto const skews = statistics.board_space_frequency_skew(player);
+			auto const board_spaces = sorted_indices(skews, [](double s) { return std::abs(s); });
+			for (auto const space : board_spaces | std::views::reverse | std::views::take(5)) {
 				auto const skew = skews[space];
 				auto const sign = skew >= 0 ? "+" : "";
 				std::cout << "    " << sign << skew << ": " << board_position_name(space) << '\n';
 			}
+		}
+		std::cout << '\n';
+	}
+
+	{
+		std::cout << "Avg street purchase first round:\n";
+		auto const avg_rounds = statistics.avg_property_first_purchase_round<street_t>();
+		auto const street_indices = sorted_indices(avg_rounds);
+		for (auto const street_idx : street_indices) {
+			std::cout << "  " << street_names[street_idx] << ": " << avg_rounds[street_idx] << '\n';
 		}
 		std::cout << '\n';
 	}

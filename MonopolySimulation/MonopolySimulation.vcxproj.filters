@@ -40,6 +40,8 @@
     <ClInclude Include="src\statistics_counters.hpp" />
     <ClInclude Include="src\simulation.hpp" />
     <ClInclude Include="src\board_space_names.hpp" />
+    <ClInclude Include="src\per_propertytype_data.hpp" />
+    <ClInclude Include="src\algorithm.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

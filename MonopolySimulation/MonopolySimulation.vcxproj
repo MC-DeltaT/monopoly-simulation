@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\algorithm.hpp" />
     <ClInclude Include="src\asset_surrender.hpp" />
     <ClInclude Include="src\gameplay_constants.hpp" />
     <ClInclude Include="src\board_utility.hpp" />
@@ -35,6 +36,7 @@
     <ClInclude Include="src\forced_sale.hpp" />
     <ClInclude Include="src\player_strategy.hpp" />
     <ClInclude Include="src\position.hpp" />
+    <ClInclude Include="src\per_propertytype_data.hpp" />
     <ClInclude Include="src\property_sell.hpp" />
     <ClInclude Include="src\property_query.hpp" />
     <ClInclude Include="src\random.hpp" />
