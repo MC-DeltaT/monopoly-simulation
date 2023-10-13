@@ -30,10 +30,10 @@ namespace monopoly {
 				auto const old_bid = auction_state.bids[player];
 				auto const new_bid = strategies.visit(player,
 					[&game_state, &random, &auction_state, property](auto& strategy) {
-						return strategy.bid_on_unowned_property(game_state, random, auction_state, property);
+						return strategy.bid_on_unowned_property(game_state, random, property, auction_state);
 					});
 				auto const bid_improved = new_bid > old_bid;
-				auto const can_afford_bid = new_bid > game_state.players[player].cash;
+				auto const can_afford_bid = new_bid <= game_state.players[player].cash;
 				if (bid_improved && can_afford_bid) {
 					auction_state.bids[player] = new_bid;
 					bids_changed = true;

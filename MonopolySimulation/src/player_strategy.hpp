@@ -24,20 +24,24 @@ namespace monopoly {
 		unsigned player;
 
 		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random, street_t const street) {
-			return _should_buy_unowned_property(game_state, random, street_values[street.global_index]);
+		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
+				PropertyType auto const property) {
+			return _should_buy_unowned_property(game_state, random, property_buy_cost(property));
 		}
 
 		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
-				[[maybe_unused]] railway_t const railway) {
-			return _should_buy_unowned_property(game_state, random, railway_value);
-		}
-
-		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
-				[[maybe_unused]] utility_t const utility) {
-			return _should_buy_unowned_property(game_state, random, utility_value);
+		unsigned bid_on_unowned_property(game_state_t const&, random_t& random, PropertyType auto const property,
+				auction_state_t const& auction) {
+			// Randomly pay value +/- up to 50%.
+			if (auction.bids[player] == 0) {
+				auto const value = property_buy_cost(property);
+				auto const adjust = random.unit_float() - 0.5;
+				auto const bid = static_cast<unsigned>(value * (1 + adjust));
+				return bid;
+			}
+			else {
+				return 0;
+			}
 		}
 
 		[[nodiscard]]
@@ -288,7 +292,7 @@ namespace monopoly {
 
 	struct player_strategies_t {
 		std::tuple<
-			flexible_player_strategy_t<
+			/*flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
 				random_unowned_property_buy_strategy_t{0.2},
 				basic_forced_sale_strategy_t{}>,
@@ -303,7 +307,8 @@ namespace monopoly {
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
 				random_unowned_property_buy_strategy_t{0.2},
-				basic_forced_sale_strategy_t{}>
+				basic_forced_sale_strategy_t{}>*/
+			test_player_strategy_t, test_player_strategy_t, test_player_strategy_t, test_player_strategy_t
 		> strategies{{0}, {1}, {2}, {3}};
 
 		player_strategies_t() = default;
