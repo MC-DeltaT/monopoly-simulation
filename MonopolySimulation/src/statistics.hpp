@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <array>
 #include <ranges>
-#include <type_traits>
 
 #include "common_constants.hpp"
 #include "common_types.hpp"
@@ -168,7 +167,7 @@ namespace monopoly {
 	private:
 		stat_counters_t const* c;
 		
-		template<typename T1, typename T2> requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+		template<typename T1, typename T2>
 		[[nodiscard]]
 		static double div(T1 const lhs, T2 const rhs) noexcept {
 			return static_cast<double>(lhs) / static_cast<double>(rhs);

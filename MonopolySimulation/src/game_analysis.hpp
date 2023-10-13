@@ -130,15 +130,17 @@ namespace monopoly {
 	}
 
 	inline void game_end_analysis(game_state_t const& game_state) {
-		auto const net_worths = player_net_worths(game_state);
+		if constexpr (record_stats) {
+			auto const net_worths = player_net_worths(game_state);
 
-		auto const player_rankings = rank_players(game_state);
-		for (auto const player : players) {
-			stat_counters.player_rank[player] += player_rankings[player];
-		}
+			auto const player_rankings = rank_players(game_state);
+			for (auto const player : players) {
+				stat_counters.player_rank[player] += player_rankings[player];
+			}
 
-		for (auto const player : players) {
-			stat_counters.final_net_worth[player] += net_worths[player];
+			for (auto const player : players) {
+				stat_counters.final_net_worth[player] += net_worths[player];
+			}
 		}
 	}
 

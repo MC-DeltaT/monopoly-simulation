@@ -71,14 +71,18 @@ namespace monopoly::board_effects {
 	inline void on_chance_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto const card = draw_card<card_type_t::chance>(game_state);
-		stat_counters.cards_drawn[player]++;
+		if constexpr (record_stats) {
+			stat_counters.cards_drawn[player]++;
+		}
 		on_card(game_state, strategies, random, player, card);
 	}
 
 	inline void on_community_chest_space(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto const card = draw_card<card_type_t::community_chest>(game_state);
-		stat_counters.cards_drawn[player]++;
+		if constexpr (record_stats) {
+			stat_counters.cards_drawn[player]++;
+		}
 		on_card(game_state, strategies, random, player, card);
 	}
 

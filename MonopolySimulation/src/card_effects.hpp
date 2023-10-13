@@ -21,16 +21,24 @@ namespace monopoly::card_effects {
 
 	inline void cash_award(game_state_t& game_state, unsigned const player, unsigned const amount) {
 		bank_pay_player(game_state, player, amount);
-		stat_counters.cash_award_card_amount[player] += amount;
-		stat_counters.cash_award_cards_drawn[player]++;
+
+		if constexpr (record_stats) {
+			stat_counters.cash_award_card_amount[player] += amount;
+			stat_counters.cash_award_cards_drawn[player]++;
+		}
+
 		// Turn ends.
 	}
 
 	inline void cash_fee(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, unsigned const amount) {
 		player_pay_bank(game_state, strategies, random, player, amount);
-		stat_counters.cash_fee_card_amount[player] += amount;
-		stat_counters.cash_fee_cards_drawn[player]++;
+
+		if constexpr (record_stats) {
+			stat_counters.cash_fee_card_amount[player] += amount;
+			stat_counters.cash_fee_cards_drawn[player]++;
+		}
+
 		// Turn ends.
 	}
 

@@ -27,9 +27,11 @@ namespace monopoly {
 		}
 		auto const end_time = std::chrono::steady_clock::now();
 
-		using float_seconds = std::chrono::duration<double>;
-		stat_counters.simulation_time_seconds =
-			std::chrono::duration_cast<float_seconds>(end_time - start_time).count();
+		if constexpr (record_stats) {
+			using float_seconds = std::chrono::duration<double>;
+			stat_counters.simulation_time_seconds =
+				std::chrono::duration_cast<float_seconds>(end_time - start_time).count();
+		}
 	}
 
 }

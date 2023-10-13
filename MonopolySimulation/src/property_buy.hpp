@@ -22,10 +22,12 @@ namespace monopoly {
 		player_pay_bank_from_hand(game_state, player, cost);
 		game_state.property_ownership.get<P>().set_owner(property, player);
 
-		auto const property_idx = static_cast<unsigned>(property);
-		if (!std::exchange(stat_helper_state.property_has_been_purchased.get<P>()[property_idx], true)) {
-			stat_counters.property_purchased_at_least_once.get<P>()[property_idx]++;
-			stat_counters.property_first_purchase_round.get<P>()[property_idx] += game_state.round + 1;
+		if constexpr (record_stats) {
+			auto const property_idx = static_cast<unsigned>(property);
+			if (!std::exchange(stat_helper_state.property_has_been_purchased.get<P>()[property_idx], true)) {
+				stat_counters.property_purchased_at_least_once.get<P>()[property_idx]++;
+				stat_counters.property_first_purchase_round.get<P>()[property_idx] += game_state.round + 1;
+			}
 		}
 	}
 

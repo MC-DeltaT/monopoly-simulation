@@ -63,7 +63,10 @@ namespace monopoly {
 		// Position starts negative and counts up to 0 each turn in jail.
 		constexpr auto in_jail_initial_position = -static_cast<int>(max_turns_in_jail);
 		update_position(game_state, player, in_jail_initial_position);
-		stat_counters.sent_to_jail_count[player]++;
+
+		if constexpr (record_stats) {
+			stat_counters.sent_to_jail_count[player]++;
+		}
 	}
 
 }

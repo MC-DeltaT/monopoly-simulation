@@ -87,7 +87,9 @@ namespace monopoly {
 					player_pay_bank(game_state, strategies, random, player, jail_release_cost);
 					// May have become bankrupt from paying get out of jail fee.
 					if (player_state.is_bankrupt()) {
-						stat_counters.turns_in_jail[player] += max_turns_in_jail;
+						if constexpr (record_stats) {
+							stat_counters.turns_in_jail[player] += max_turns_in_jail;
+						}
 						// Turn ends.
 						return;
 					}
@@ -102,9 +104,11 @@ namespace monopoly {
 			}
 		}
 
-		assert(std::cmp_greater_equal(player_state.position, -static_cast<long>(max_turns_in_jail)));
-		assert(std::cmp_less(player_state.position, 0));
-		stat_counters.turns_in_jail[player] += player_state.position + static_cast<long>(max_turns_in_jail) + 1;
+		if constexpr (record_stats) {
+			assert(std::cmp_greater_equal(player_state.position, -static_cast<long>(max_turns_in_jail)));
+			assert(std::cmp_less(player_state.position, 0));
+			stat_counters.turns_in_jail[player] += player_state.position + static_cast<long>(max_turns_in_jail) + 1;
+		}
 
 		// Need to set position back to a normal board space first, since movement functions don't deal with moving
 		// directly from jail.

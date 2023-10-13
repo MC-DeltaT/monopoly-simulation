@@ -9,6 +9,9 @@
 
 namespace monopoly {
 
+	inline constexpr bool record_stats = true;
+
+
 	using int_count = unsigned long long;
 	using float_count = double;
 	using per_player_int_count = std::array<int_count, player_count>;
