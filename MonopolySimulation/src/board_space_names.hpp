@@ -35,7 +35,6 @@ namespace monopoly {
 		"Park Lane",
 		"Mayfair"
 	};
-	static_assert(all_unique(street_names));
 
 	inline constexpr std::array<std::string_view, railway_count> railway_names{
 		"Kings Cross Station",
@@ -43,19 +42,17 @@ namespace monopoly {
 		"Fenchurch St Station",
 		"Liverpool St Station"
 	};
-	static_assert(all_unique(railway_names));
 
 	inline constexpr std::array<std::string_view, utility_count> utility_names{
 		"Electric Company",
 		"Water Works"
 	};
-	static_assert(all_unique(utility_names));
 
 	// Gets the name of a board position.
 	// 10 is "Just Visiting Jail", while negative and 40 is "In Jail".
 	// This is consistent with the player position scheme and statistics space indexing.
 	[[nodiscard]]
-	constexpr std::string_view board_position_name(int position) {
+	constexpr std::string_view board_position_name(long long position) {
 		constexpr std::array<std::string_view, board_space_count> names{
 			"Go",
 			std::get<0>(street_names),

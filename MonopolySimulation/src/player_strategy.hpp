@@ -264,23 +264,23 @@ namespace monopoly {
 		std::tuple<
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2},
-				random_unowned_property_bid_strategy_t{-0.4, 1.2},
+				random_unowned_property_buy_strategy_t{0.2f},
+				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2},
-				random_unowned_property_bid_strategy_t{-0.4, 1.2},
+				random_unowned_property_buy_strategy_t{0.2f},
+				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2},
-				random_unowned_property_bid_strategy_t{-0.4, 1.2},
+				random_unowned_property_buy_strategy_t{0.2f},
+				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2},
-				random_unowned_property_bid_strategy_t{-0.4, 1.2},
+				random_unowned_property_buy_strategy_t{0.2f},
+				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
 				basic_forced_sale_strategy_t{}>
 			//test_player_strategy_t, test_player_strategy_t, test_player_strategy_t, test_player_strategy_t
 		> strategies{{0}, {1}, {2}, {3}};

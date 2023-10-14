@@ -19,6 +19,16 @@ void print_statistics() {
 
 	std::cout << "Avg rounds per game: " << statistics.avg_rounds_per_game() << "\n\n";
 
+	{
+		std::cout << "Game length histogram:\n";
+		stat_counters.game_length_histogram.enumerate_bins(
+			[](auto const lower, auto const upper, auto const value) {
+				auto const freq = static_cast<double>(value) / stat_counters.games;
+				std::cout << "  " << lower << '-' << upper << ": " << freq << '\n';
+			});
+		std::cout << '\n';
+	}
+
 	std::cout << "Avg player ranks:\n";
 	for (auto const player : players) {
 		std::cout << "  Player " << player << ": " << statistics.avg_player_rank(player) << '\n';
@@ -114,6 +124,26 @@ void print_statistics() {
 		std::cout << '\n';
 	}
 
+	{
+		std::cout << "Avg railway purchase first round:\n";
+		auto const avg_rounds = statistics.avg_property_first_purchase_round<railway_t>();
+		auto const railway_indices = sorted_indices(avg_rounds);
+		for (auto const railway_idx : railway_indices) {
+			std::cout << "  " << railway_names[railway_idx] << ": " << avg_rounds[railway_idx] << '\n';
+		}
+		std::cout << '\n';
+	}
+
+	{
+		std::cout << "Avg utility purchase first round:\n";
+		auto const avg_rounds = statistics.avg_property_first_purchase_round<utility_t>();
+		auto const utility_indices = sorted_indices(avg_rounds);
+		for (auto const utility_idx : utility_indices) {
+			std::cout << "  " << railway_names[utility_idx] << ": " << avg_rounds[utility_idx] << '\n';
+		}
+		std::cout << '\n';
+	}
+
 	std::cout << "Simulation speed:\n"
 		<< "  " << statistics.avg_games_per_second() << " game/sec\n"
 		<< "  " << statistics.avg_rounds_per_second() << " round/sec\n"
@@ -127,8 +157,8 @@ void print_statistics() {
 int main() {
 	using namespace monopoly;
 
-	constexpr std::size_t game_count = 1000;
-	constexpr auto max_rounds = 100;
+	constexpr std::size_t game_count = 100000;
+	constexpr auto max_rounds = 10000;
 
 	random_t random{std::random_device{}()};
 	player_strategies_t strategies;

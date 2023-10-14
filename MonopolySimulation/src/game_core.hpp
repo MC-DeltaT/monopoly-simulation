@@ -58,6 +58,7 @@ namespace monopoly {
 		if constexpr (record_stats) {
 			stat_counters.games++;
 			stat_counters.rounds += game_state.round;
+			stat_counters.game_length_histogram.add(game_state.round);
 			for (auto const player : players) {
 				auto const bankrupt_round = game_state.players[player].bankrupt_round;
 				// Note round number begins at 0, while number of rounds is always >= 1.

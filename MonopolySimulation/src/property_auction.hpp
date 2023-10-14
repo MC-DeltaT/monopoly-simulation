@@ -8,12 +8,14 @@
 #include "player_strategy.hpp"
 #include "property_buy.hpp"
 #include "random.hpp"
+#include "statistics_counters.hpp"
 
 
 namespace monopoly {
 
-	inline void auction_property(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
-			PropertyType auto const property) {
+	template<PropertyType P>
+	void auction_property(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+			P const property) {
 		// There doesn't seem to be any info on how exactly auctions are carried out.
 		// What is implemented here is:
 		//   - Players are queried for their bids in a round robin fashion.
@@ -52,6 +54,12 @@ namespace monopoly {
 			if (best_bid_count == 1) {
 				auto const best_bid_player = static_cast<unsigned>(best_bid_it - auction_state.bids.cbegin());
 				buy_unowned_property(game_state, best_bid_player, property, best_bid_price);
+
+				if (record_stats) {
+					auto const property_idx = static_cast<unsigned>(property);
+					stat_counters.property_unowned_auction_price.get<P>()[property_idx] += best_bid_price;
+					stat_counters.property_unowned_auction_count.get<P>()[property_idx]++;
+				}
 			}
 		}
 	}
