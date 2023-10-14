@@ -118,6 +118,7 @@ namespace monopoly {
 				auto const min = mean - width_abs / 2;
 				auto const r = random.unit_float();
 				auto const bid = r * width_abs + min;
+				// TODO? maybe clamp result
 				return static_cast<unsigned>(bid);
 			}
 			else {
@@ -264,23 +265,23 @@ namespace monopoly {
 		std::tuple<
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2f},
-				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
+				random_unowned_property_buy_strategy_t{0},
+				random_unowned_property_bid_strategy_t{0, 0},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2f},
-				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
+				random_unowned_property_buy_strategy_t{0},
+				random_unowned_property_bid_strategy_t{-0.25, 0},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2f},
-				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
+				random_unowned_property_buy_strategy_t{0},
+				random_unowned_property_bid_strategy_t{+0.25, 0},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0.2f},
-				random_unowned_property_bid_strategy_t{-0.4f, 1.2f},
+				random_unowned_property_buy_strategy_t{0},
+				random_unowned_property_bid_strategy_t{-0.5, 0},
 				basic_forced_sale_strategy_t{}>
 			//test_player_strategy_t, test_player_strategy_t, test_player_strategy_t, test_player_strategy_t
 		> strategies{{0}, {1}, {2}, {3}};

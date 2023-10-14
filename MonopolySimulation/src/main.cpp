@@ -88,6 +88,13 @@ void print_statistics() {
 			<< statistics.avg_cash_fee_card_amount_per_game(player) << "/game\n";
 	}
 	std::cout << '\n';
+	
+	std::cout << "Avg unowned property auctions won:\n";
+	for (auto const player : players) {
+		std::cout << "  Player " << player << ": "
+			<< statistics.avg_unowned_property_auctions_won_per_game(player) << "/game\n";
+	}
+	std::cout << '\n';
 
 	{
 		std::cout << "Board space frequencies:\n";
@@ -139,7 +146,7 @@ void print_statistics() {
 		auto const avg_rounds = statistics.avg_property_first_purchase_round<utility_t>();
 		auto const utility_indices = sorted_indices(avg_rounds);
 		for (auto const utility_idx : utility_indices) {
-			std::cout << "  " << railway_names[utility_idx] << ": " << avg_rounds[utility_idx] << '\n';
+			std::cout << "  " << utility_names[utility_idx] << ": " << avg_rounds[utility_idx] << '\n';
 		}
 		std::cout << '\n';
 	}
@@ -157,8 +164,8 @@ void print_statistics() {
 int main() {
 	using namespace monopoly;
 
-	constexpr std::size_t game_count = 100000;
-	constexpr auto max_rounds = 10000;
+	constexpr std::size_t game_count = 1000;
+	constexpr auto max_rounds = 100;
 
 	random_t random{std::random_device{}()};
 	player_strategies_t strategies;

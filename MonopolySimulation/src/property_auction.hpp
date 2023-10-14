@@ -59,6 +59,7 @@ namespace monopoly {
 					auto const property_idx = static_cast<unsigned>(property);
 					stat_counters.property_unowned_auction_price.get<P>()[property_idx] += best_bid_price;
 					stat_counters.property_unowned_auction_count.get<P>()[property_idx]++;
+					stat_counters.unowned_property_auctions_won[best_bid_player]++;
 				}
 			}
 		}

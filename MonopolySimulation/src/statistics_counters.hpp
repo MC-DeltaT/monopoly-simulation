@@ -42,6 +42,7 @@ namespace monopoly {
 			++bins[compute_bin(value)];
 		}
 
+		[[nodiscard]]
 		static constexpr unsigned compute_bin(unsigned long long value) noexcept {
 			if (value >= true_max) {
 				return bin_count - 1;
@@ -59,6 +60,7 @@ namespace monopoly {
 
 		// Returns exclusive upper bound of each bin.
 		// The final bin is not included, which spans from true_max to infinity.
+		[[nodiscard]]
 		static constexpr std::array<unsigned long long, bin_count - 1> bin_bounds() noexcept {
 			std::array<unsigned long long, bin_count - 1> result{};
 			unsigned long long bin_upper_bound = 2;
@@ -96,7 +98,7 @@ namespace monopoly {
 		int_count rounds{};
 
 		// Histogram of game lengths.
-		log2_histogram<1000> game_length_histogram;
+		log2_histogram<100> game_length_histogram;
 
 		// Number of turns played, for each player.
 		// This includes all turns (including in jail) when the player is not bankrupt.
@@ -157,6 +159,9 @@ namespace monopoly {
 
 		// Number of times a property was sold in auction when landing on it.
 		per_property_int_count property_unowned_auction_count{};
+
+		// Number of times a player won an unowned property auction.
+		per_player_int_count unowned_property_auctions_won{};
 	};
 
 	inline stat_counters_t stat_counters{};

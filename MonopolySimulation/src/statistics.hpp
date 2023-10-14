@@ -164,6 +164,11 @@ namespace monopoly {
 			return result;
 		}
 
+		[[nodiscard]]
+		double avg_unowned_property_auctions_won_per_game(unsigned const player) const {
+			return div(c->unowned_property_auctions_won[player], c->games);
+		}
+
 	private:
 		stat_counters_t const* c;
 		
