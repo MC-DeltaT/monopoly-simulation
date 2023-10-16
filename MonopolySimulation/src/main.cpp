@@ -41,6 +41,12 @@ void print_statistics() {
 	}
 	std::cout << '\n';
 
+	std::cout << "Avg times passed Go per turn:\n";
+	for (auto const player : players) {
+		std::cout << "  Player " << player << ": " << statistics.avg_go_passes_per_turn(player) << '\n';
+	}
+	std::cout << '\n';
+
 	std::cout << "Avg times sent to jail per turn:\n";
 	for (auto const player : players) {
 		std::cout << "  Player " << player << ": "
@@ -97,7 +103,7 @@ void print_statistics() {
 	std::cout << '\n';
 
 	{
-		std::cout << "Board space frequencies:\n";
+		std::cout << "Board space relative frequencies:\n";
 		auto const rel_freqs = statistics.board_space_relative_frequencies();
 		auto const board_spaces = sorted_indices(rel_freqs);
 		for (auto const space : board_spaces | std::views::reverse) {
@@ -107,7 +113,7 @@ void print_statistics() {
 	}
 
 	{
-		std::cout << "Board space frequency skew:\n";
+		std::cout << "Board space frequency skew (absolute):\n";
 		for (auto const player : players) {
 			std::cout << "  Player " << player << ":\n";
 			auto const skews = statistics.board_space_frequency_skew(player);
@@ -151,6 +157,42 @@ void print_statistics() {
 		std::cout << '\n';
 	}
 
+	{
+		std::cout << "Avg unowned street auction premium (%):\n";
+		auto const premiums = statistics.avg_unowned_property_auction_premium<street_t>();
+		auto const street_indices = sorted_indices(premiums, [](double s) { return std::abs(s); });
+		for (auto const street : street_indices | std::views::reverse | std::views::take(5)) {
+			auto const premium = premiums[street];
+			auto const sign = premium >= 0 ? "+" : "";
+			std::cout << "    " << sign << premium * 100 << ": " << street_names[street] << '\n';
+		}
+		std::cout << '\n';
+	}
+
+	{
+		std::cout << "Avg unowned railway auction premium (%):\n";
+		auto const premiums = statistics.avg_unowned_property_auction_premium<railway_t>();
+		auto const railway_indices = sorted_indices(premiums, [](double s) { return std::abs(s); });
+		for (auto const railway : railway_indices | std::views::reverse) {
+			auto const premium = premiums[railway];
+			auto const sign = premium >= 0 ? "+" : "";
+			std::cout << "    " << sign << premium * 100 << ": " << railway_names[railway] << '\n';
+		}
+		std::cout << '\n';
+	}
+
+	{
+		std::cout << "Avg unowned utility auction premium (%):\n";
+		auto const premiums = statistics.avg_unowned_property_auction_premium<utility_t>();
+		auto const utility_indices = sorted_indices(premiums, [](double s) { return std::abs(s); });
+		for (auto const utility : utility_indices | std::views::reverse) {
+			auto const premium = premiums[utility];
+			auto const sign = premium >= 0 ? "+" : "";
+			std::cout << "    " << sign << premium * 100 << ": " << utility_names[utility] << '\n';
+		}
+		std::cout << '\n';
+	}
+
 	std::cout << "Simulation speed:\n"
 		<< "  " << statistics.avg_games_per_second() << " game/sec\n"
 		<< "  " << statistics.avg_rounds_per_second() << " round/sec\n"
@@ -164,7 +206,11 @@ void print_statistics() {
 int main() {
 	using namespace monopoly;
 
+#if defined(NDEBUG) || defined(RELEASE)
+	constexpr std::size_t game_count = 1000000;
+#else
 	constexpr std::size_t game_count = 1000;
+#endif
 	constexpr auto max_rounds = 100;
 
 	random_t random{std::random_device{}()};

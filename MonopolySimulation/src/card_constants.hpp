@@ -83,7 +83,7 @@ namespace monopoly {
 
 	// Maps a card deck type to its Get Out Of Jail Free card.
 	template<card_type_t C>
-	inline constexpr nullptr_t get_out_of_jail_free_card = nullptr;
+	inline constexpr auto get_out_of_jail_free_card = nullptr;
 
 	template<> inline constexpr auto get_out_of_jail_free_card<card_type_t::chance> =
 		chance_card_t::get_out_of_jail_free;

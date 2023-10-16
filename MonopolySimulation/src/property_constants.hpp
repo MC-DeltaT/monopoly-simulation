@@ -9,7 +9,7 @@
 namespace monopoly {
 
 	// In order of street appearance on the board.
-	// global_index must be sequential starting from 0.
+	// generic_index must be sequential starting from 0.
 	inline constexpr std::array<street_t, 22> streets{{
 		{0, 0, 0},
 		{1, 0, 1},
@@ -75,4 +75,9 @@ namespace monopoly {
 		utility_t::water_works
 	};
 
+
+	inline constexpr street_t::street_t(unsigned const generic_index) :
+		street_t{streets[generic_index]}
+	{}
+	
 }

@@ -6,6 +6,7 @@
 
 #include "common_constants.hpp"
 #include "common_types.hpp"
+#include "property_values.hpp"
 #include "statistics_counters.hpp"
 
 
@@ -35,6 +36,11 @@ namespace monopoly {
 		[[nodiscard]]
 		double avg_rounds_per_game() const {
 			return div(c->rounds, c->games);
+		}
+
+		[[nodiscard]]
+		double avg_go_passes_per_turn(unsigned const player) const {
+			return div(c->go_passes[player], c->turns_played[player]);
 		}
 		
 		[[nodiscard]]
@@ -160,6 +166,30 @@ namespace monopoly {
 			std::array<double, sum.size()> result{};
 			for (std::size_t i = 0; i < result.size(); ++i) {
 				result[i] = div(sum[i], c->property_purchased_at_least_once.get<P>()[i]);
+			}
+			return result;
+		}
+
+		template<PropertyType P>
+		[[nodiscard]]
+		auto avg_unowned_property_auction_price() const {
+			auto const sum = c->property_unowned_auction_price.get<P>();
+			std::array<double, sum.size()> result{};
+			for (std::size_t i = 0; i < result.size(); ++i) {
+				result[i] = div(sum[i], c->property_unowned_auction_count.get<P>()[i]);
+			}
+			return result;
+		}
+
+		// Auction sale premium as a fraction of the property value.
+		template<PropertyType P>
+		[[nodiscard]]
+		auto avg_unowned_property_auction_premium() const {
+			auto const auction_prices = avg_unowned_property_auction_price<P>();
+			std::array<double, auction_prices.size()> result{};
+			for (unsigned i = 0; i < auction_prices.size(); ++i) {
+				auto const regular_cost = property_buy_cost(P{i});
+				result[i] = (auction_prices[i] - regular_cost) / regular_cost;
 			}
 			return result;
 		}

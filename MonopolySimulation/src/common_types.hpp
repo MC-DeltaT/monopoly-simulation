@@ -8,14 +8,21 @@ namespace monopoly {
 	enum class board_space_t : unsigned;
 
 
-	struct street_t {
-		unsigned global_index;
+	class street_t {
+	public:
+		constexpr street_t(unsigned const generic_index, unsigned const colour_set, unsigned const index_in_set) noexcept :
+			generic_index{generic_index}, colour_set{colour_set}, index_in_set{index_in_set}
+		{}
+
+		constexpr street_t(unsigned const generic_index);
+
+		unsigned generic_index;
 		unsigned colour_set;
 		unsigned index_in_set;
 
 		[[nodiscard]]
-		constexpr operator unsigned() const noexcept {
-			return global_index;
+		explicit constexpr operator unsigned() const noexcept {
+			return generic_index;
 		}
 	};
 

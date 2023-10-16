@@ -23,7 +23,7 @@ namespace monopoly {
 		}
 		else {
 			auto const building_level = game_state.street_development.building_level(street);
-			unsigned rent = street_rents[street.global_index][building_level];
+			unsigned rent = street_rents[street.generic_index][building_level];
 			auto const owns_entire_set =
 				game_state.property_ownership.street.owns_entire_colour_set(*owner, street.colour_set);
 			if (building_level == 0 && owns_entire_set) {

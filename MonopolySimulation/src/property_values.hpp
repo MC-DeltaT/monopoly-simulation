@@ -35,7 +35,7 @@ namespace monopoly {
 
 	[[nodiscard]]
 	constexpr unsigned property_buy_cost(street_t const street) {
-		return street_values[street.global_index];
+		return street_values[street.generic_index];
 	}
 
 	[[nodiscard]]
@@ -55,7 +55,7 @@ namespace monopoly {
 
 	[[nodiscard]]
 	constexpr unsigned property_mortgage_value(street_t const street) {
-		return street_values[street.global_index] / 2u;
+		return street_values[street.generic_index] / 2u;
 	}
 
 	[[nodiscard]]
@@ -75,7 +75,7 @@ namespace monopoly {
 
 	[[nodiscard]]
 	constexpr unsigned property_sell_value(street_t const street) {
-		return street_values[street.global_index] / 2u;
+		return street_values[street.generic_index] / 2u;
 	}
 
 	[[nodiscard]]

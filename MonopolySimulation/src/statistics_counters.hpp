@@ -104,6 +104,9 @@ namespace monopoly {
 		// This includes all turns (including in jail) when the player is not bankrupt.
 		per_player_int_count turns_played{};
 
+		// Number of times passed Go and collected Go salary, for each player.
+		per_player_int_count go_passes{};
+
 		// (Sum of) end game ranks for each player.
 		// 0 = first place, to player_count-1 = last place
 		per_player_int_count player_rank{};

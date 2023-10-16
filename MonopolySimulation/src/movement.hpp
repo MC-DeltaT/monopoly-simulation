@@ -13,6 +13,17 @@
 #include "statistics_counters.hpp"
 
 
+namespace monopoly::detail {
+
+	inline void on_passed_go(game_state_t& game_state, unsigned const player) {
+		pay_go_salary(game_state, player);
+		if constexpr (record_stats) {
+			stat_counters.go_passes[player]++;
+		}
+	}
+
+}
+
 namespace monopoly {
 
 	// Advances the player's position to the specified board space, paying the Go salary if passing Go.
@@ -21,25 +32,25 @@ namespace monopoly {
 		// Can't use this to advance to Go, because Go is handled separately.
 		assert(space != board_space_t::go);
 
-		auto const passed_go = advance_position_absolute(game_state, player, static_cast<unsigned>(space));
-		if (passed_go) {
-			pay_go_salary(game_state, player);
+		auto const go_passes = advance_position_absolute(game_state, player, static_cast<unsigned>(space));
+		if (go_passes) {
+			detail::on_passed_go(game_state, player);
 		}
 	}
 
 	// Advances the player's position by a number of board spaces, paying the Go salary if passing Go.
 	inline void advance_by_spaces(game_state_t& game_state, unsigned const player, unsigned const offset) {
-		auto const passed_go = advance_position_relative(game_state, player, offset);
-		if (passed_go) {
-			pay_go_salary(game_state, player);
+		auto const go_passes = advance_position_relative(game_state, player, offset);
+		if (go_passes) {
+			detail::on_passed_go(game_state, player);
 		}
 	}
 
 	// Advances the player's position by a number of board spaces.
 	// Assumes the movement will not advance the player past Go (i.e. never pays the Go salary).
 	inline void advance_by_spaces_no_go(game_state_t& game_state, unsigned player, unsigned const offset) {
-		[[maybe_unused]] auto const passed_go = advance_position_relative(game_state, player, offset);
-		assert(!passed_go);
+		[[maybe_unused]] auto const go_passes = advance_position_relative(game_state, player, offset);
+		assert(!go_passes);
 	}
 
 	// Moves the player's position back by a number of board spaces.
@@ -55,7 +66,7 @@ namespace monopoly {
 	// Advances the player's position to Go and pays them the salary.
 	inline void advance_to_go(game_state_t& game_state, unsigned const player) {
 		update_position(game_state, player, static_cast<unsigned>(board_space_t::go));
-		pay_go_salary(game_state, player);
+		detail::on_passed_go(game_state, player);
 	}
 
 	// Moves the player directly to jail, without passing Go.

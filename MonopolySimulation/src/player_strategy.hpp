@@ -146,7 +146,7 @@ namespace monopoly {
 				auto const can_sell = game_state.property_ownership.street.is_owner(player, street)
 					&& is_property_sellable(game_state, street);
 				if (can_sell) {
-					choices.push_back(generic_sell_to_bank_t{generic_sell_to_bank_type::street, street.global_index});
+					choices.push_back(generic_sell_to_bank_t{generic_sell_to_bank_type::street, static_cast<unsigned>(street)});
 					amount_remaining -= property_sell_value(street);
 					if (amount_remaining <= 0) {
 						break;

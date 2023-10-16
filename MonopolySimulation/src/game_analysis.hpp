@@ -43,7 +43,7 @@ namespace monopoly {
 					safe_uint_add(net_worths[*owner], property_mortgage_value(street));
 				}
 				else {
-					auto const listed_value = street_values[street.global_index];
+					auto const listed_value = street_values[street.generic_index];
 					auto const building_level = game_state.street_development.building_level(street);
 					// Note that a hotel is equivalent to 5 houses.
 					auto const value = listed_value + building_values[street.colour_set] * building_level;
