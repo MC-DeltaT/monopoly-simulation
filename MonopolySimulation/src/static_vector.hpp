@@ -42,6 +42,11 @@ namespace monopoly {
 			return _size == 0;
 		}
 
+		[[nodiscard]]
+		constexpr bool full() const noexcept {
+			return _size == N;
+		}
+
 	private:
 		std::array<T, N> _elements;
 		unsigned _size;

@@ -142,42 +142,39 @@ namespace monopoly {
 
 			long long amount_remaining = min_amount;
 
+			// Assuming streets are already in order of ascending value (true for regular gameplay config).
 			for (auto const& street : streets) {
 				auto const can_sell = game_state.property_ownership.street.is_owner(player, street)
 					&& is_property_sellable(game_state, street);
 				if (can_sell) {
-					choices.push_back(generic_sell_to_bank_t{generic_sell_to_bank_type::street, static_cast<unsigned>(street)});
+					choices.emplace_back(generic_sell_to_bank_type::street, static_cast<unsigned>(street));
 					amount_remaining -= property_sell_value(street);
-					if (amount_remaining <= 0) {
-						break;
+					if (amount_remaining <= 0 || choices.full()) {
+						return choices;
 					}
 				}
 			}
 
-			if (amount_remaining > 0) {
-				for (auto const utility : utilities) {
-					auto const can_sell = game_state.property_ownership.utility.is_owner(player, utility)
-						&& is_property_sellable(game_state, utility);
-					if (can_sell) {
-						choices.emplace_back(generic_sell_to_bank_type::utility, static_cast<unsigned>(utility));
-						amount_remaining -= utility_sell_value;
-						if (amount_remaining <= 0) {
-							break;
-						}
+			for (auto const utility : utilities) {
+				auto const can_sell = game_state.property_ownership.utility.is_owner(player, utility)
+					&& is_property_sellable(game_state, utility);
+				if (can_sell) {
+					choices.emplace_back(generic_sell_to_bank_type::utility, static_cast<unsigned>(utility));
+					amount_remaining -= utility_sell_value;
+					if (amount_remaining <= 0 || choices.full()) {
+						return choices;
 					}
 				}
 			}
 
-			if (amount_remaining > 0) {
-				for (auto const railway : railways) {
-					auto const can_sell = game_state.property_ownership.railway.is_owner(player, railway)
-						&& is_property_sellable(game_state, railway);
-					if (can_sell) {
-						choices.emplace_back(generic_sell_to_bank_type::railway, static_cast<unsigned>(railway));
-						amount_remaining -= railway_sell_value;
-						if (amount_remaining <= 0) {
-							break;
-						}
+			for (auto const railway : railways) {
+				auto const can_sell = game_state.property_ownership.railway.is_owner(player, railway)
+					&& is_property_sellable(game_state, railway);
+				if (can_sell) {
+					choices.emplace_back(generic_sell_to_bank_type::railway, static_cast<unsigned>(railway));
+					amount_remaining -= railway_sell_value;
+					if (amount_remaining <= 0 || choices.full()) {
+						return choices;
 					}
 				}
 			}

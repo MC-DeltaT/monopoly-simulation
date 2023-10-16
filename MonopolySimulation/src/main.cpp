@@ -12,6 +12,7 @@
 #include "random.hpp"
 #include "simulation.hpp"
 #include "statistics.hpp"
+#include "statistics_counters.hpp"
 
 
 void print_statistics() {
@@ -158,37 +159,37 @@ void print_statistics() {
 	}
 
 	{
-		std::cout << "Avg unowned street auction premium (%):\n";
+		std::cout << "Avg unowned street auction premium (proportional):\n";
 		auto const premiums = statistics.avg_unowned_property_auction_premium<street_t>();
 		auto const street_indices = sorted_indices(premiums, [](double s) { return std::abs(s); });
 		for (auto const street : street_indices | std::views::reverse | std::views::take(5)) {
 			auto const premium = premiums[street];
 			auto const sign = premium >= 0 ? "+" : "";
-			std::cout << "    " << sign << premium * 100 << ": " << street_names[street] << '\n';
+			std::cout << "    " << sign << premium << ": " << street_names[street] << '\n';
 		}
 		std::cout << '\n';
 	}
 
 	{
-		std::cout << "Avg unowned railway auction premium (%):\n";
+		std::cout << "Avg unowned railway auction premium (proportional):\n";
 		auto const premiums = statistics.avg_unowned_property_auction_premium<railway_t>();
 		auto const railway_indices = sorted_indices(premiums, [](double s) { return std::abs(s); });
 		for (auto const railway : railway_indices | std::views::reverse) {
 			auto const premium = premiums[railway];
 			auto const sign = premium >= 0 ? "+" : "";
-			std::cout << "    " << sign << premium * 100 << ": " << railway_names[railway] << '\n';
+			std::cout << "    " << sign << premium << ": " << railway_names[railway] << '\n';
 		}
 		std::cout << '\n';
 	}
 
 	{
-		std::cout << "Avg unowned utility auction premium (%):\n";
+		std::cout << "Avg unowned utility auction premium (proportional):\n";
 		auto const premiums = statistics.avg_unowned_property_auction_premium<utility_t>();
 		auto const utility_indices = sorted_indices(premiums, [](double s) { return std::abs(s); });
 		for (auto const utility : utility_indices | std::views::reverse) {
 			auto const premium = premiums[utility];
 			auto const sign = premium >= 0 ? "+" : "";
-			std::cout << "    " << sign << premium * 100 << ": " << utility_names[utility] << '\n';
+			std::cout << "    " << sign << premium << ": " << utility_names[utility] << '\n';
 		}
 		std::cout << '\n';
 	}
@@ -207,7 +208,7 @@ int main() {
 	using namespace monopoly;
 
 #if defined(NDEBUG) || defined(RELEASE)
-	constexpr std::size_t game_count = 1000000;
+	constexpr std::size_t game_count = 1'000'000;
 #else
 	constexpr std::size_t game_count = 1000;
 #endif
@@ -216,7 +217,9 @@ int main() {
 	random_t random{std::random_device{}()};
 	player_strategies_t strategies;
 
-	monopoly::run_simulations(strategies, random, game_count, max_rounds);
+	run_simulations(strategies, random, game_count, max_rounds);
 
-	print_statistics();
+	if (record_stats) {
+		print_statistics();
+	}
 }
