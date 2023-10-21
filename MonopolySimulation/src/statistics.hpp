@@ -184,7 +184,25 @@ namespace monopoly {
 			return div(c->cash_fee_card_amount[player], c->games);
 		}
 
-		// TODO: per-player card stats
+		[[nodiscard]]
+		double avg_per_player_cash_fee_card_amount_received_per_game(unsigned const player) const {
+			return div(c->per_player_cash_fee_card_receive_amount[player], c->games);
+		}
+
+		[[nodiscard]]
+		double avg_per_player_cash_award_card_amount_paid_per_game(unsigned const player) const {
+			return div(c->per_player_cash_award_card_payment_amount[player], c->games);
+		}
+
+		[[nodiscard]]
+		double avg_property_purchase_costs_per_game(unsigned const player) const {
+			return div(c->property_purchase_costs[player], c->games);
+		}
+
+		[[nodiscard]]
+		double avg_property_sell_income_per_game(unsigned const player) const {
+			return div(c->property_sell_income[player], c->games);
+		}
 
 		template<PropertyType P>
 		[[nodiscard]]

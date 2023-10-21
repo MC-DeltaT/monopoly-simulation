@@ -51,7 +51,7 @@ namespace monopoly {
 	// Always use Get Out Of Jail Free (if the player has one) after a fixed number of turns in jail.
 	struct turn_based_jail_strategy_t {
 		// Turn in jail on which to use Get Out Of Jail Free card.
-		// 0 is the first turn, and so on. Set it to a large number to never use the card.
+		// 0 is the first turn, and so on.
 		unsigned use_get_out_of_jail_free_turn;
 
 		[[nodiscard]]
@@ -81,6 +81,16 @@ namespace monopoly {
 	};
 
 
+	// Always try to roll doubles to get out of jail.
+	struct always_roll_jail_strategy_t {
+		[[nodiscard]]
+		static constexpr std::optional<card_type_t> should_use_get_out_of_jail_free(game_state_t const&, random_t&,
+				unsigned const) noexcept {
+			return std::nullopt;
+		}
+	};
+
+
 	// Fixed probability of buying a property if the player can afford it.
 	struct random_unowned_property_buy_strategy_t {
 		float buy_probability;
@@ -94,6 +104,16 @@ namespace monopoly {
 				auto const buy = random.biased_bool(buy_probability);
 				return buy;
 			}
+			return false;
+		}
+	};
+
+
+	// Never buy unowned property.
+	struct dont_buy_unowned_property_buy_strategy_t {
+		[[nodiscard]]
+		static constexpr bool should_buy_unowned_property(game_state_t const&, random_t&, unsigned const,
+				PropertyType auto const) noexcept {
 			return false;
 		}
 	};
@@ -124,6 +144,16 @@ namespace monopoly {
 			else {
 				return 0;
 			}
+		}
+	};
+
+
+	// Never participate in unowned property auctions.
+	struct dont_bid_unowned_property_bid_strategy_t {
+		[[nodiscard]]
+		static constexpr unsigned bid_on_unowned_property(game_state_t const&, random_t&, unsigned const,
+				PropertyType auto const, auction_state_t const&) noexcept {
+			return 0;
 		}
 	};
 
@@ -261,26 +291,25 @@ namespace monopoly {
 	struct player_strategies_t {
 		std::tuple<
 			flexible_player_strategy_t<
-				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0},
-				random_unowned_property_bid_strategy_t{0, 0},
+				always_roll_jail_strategy_t{},
+				dont_buy_unowned_property_buy_strategy_t{},
+				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0},
-				random_unowned_property_bid_strategy_t{-0.25, 0},
+				always_roll_jail_strategy_t{},
+				dont_buy_unowned_property_buy_strategy_t{},
+				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0},
-				random_unowned_property_bid_strategy_t{+0.25, 0},
+				always_roll_jail_strategy_t{},
+				dont_buy_unowned_property_buy_strategy_t{},
+				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				turn_based_jail_strategy_t{999},
-				random_unowned_property_buy_strategy_t{0},
-				random_unowned_property_bid_strategy_t{-0.5, 0},
+				always_roll_jail_strategy_t{},
+				dont_buy_unowned_property_buy_strategy_t{},
+				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>
-			//test_player_strategy_t, test_player_strategy_t, test_player_strategy_t, test_player_strategy_t
 		> strategies{{0}, {1}, {2}, {3}};
 
 		player_strategies_t() = default;

@@ -18,6 +18,8 @@
 void print_statistics() {
 	using namespace monopoly;
 
+	std::cout << "Games: " << stat_counters.games << "\n\n";
+
 	std::cout << "Avg rounds per game: " << statistics.avg_rounds_per_game() << "\n\n";
 
 	{
@@ -42,9 +44,30 @@ void print_statistics() {
 	}
 	std::cout << '\n';
 
-	// TODO: cash payment breakdown
+	std::cout << "Avg cash income per game breakdown:\n";
+	for (auto const player : players) {
+		std::cout << "  Player " << player << ":\n";
+		std::cout << "    " << statistics.avg_go_salary_per_game(player) << " Go salary\n";
+		std::cout << "    " << statistics.avg_rent_received_per_game(player) << " rent\n";
+		std::cout << "    " << statistics.avg_property_sell_income_per_game(player) << " property sale\n";
+		std::cout << "    " << statistics.avg_cash_award_card_amount_per_game(player) << " cash award card\n";
+		std::cout << "    " << statistics.avg_per_player_cash_fee_card_amount_received_per_game(player)
+			<< " per-player cash fee card\n";
+	}
+	std::cout << '\n';
 
-	// TODO: cash received breakdown
+	std::cout << "Avg cash expenditure per game breakdown:\n";
+	for (auto const player : players) {
+		std::cout << "  Player " << player << ":\n";
+		std::cout << "    " << statistics.avg_tax_space_paid_per_game_approx(player) << " tax space\n";
+		std::cout << "    " << statistics.avg_jail_fee_per_game_approx(player) << " jail fee\n";
+		std::cout << "    " << statistics.avg_rent_paid_per_game(player) << " rent\n";
+		std::cout << "    " << statistics.avg_property_purchase_costs_per_game(player) << " property purchase\n";
+		std::cout << "    " << statistics.avg_cash_fee_card_amount_per_game(player) << " cash fee card\n";
+		std::cout << "    " << statistics.avg_per_player_cash_award_card_amount_paid_per_game(player)
+			<< " per-player cash award card\n";
+	}
+	std::cout << '\n';
 
 	std::cout << "Avg times passed Go per turn:\n";
 	for (auto const player : players) {
@@ -69,10 +92,8 @@ void print_statistics() {
 	std::cout << "Avg rent payments:\n";
 	for (auto const player : players) {
 		std::cout << "  Player " << player << ":\n"
-			<< "    +" << statistics.avg_rent_received_per_game(player) << "/game  \t"
 			<< "    +" << statistics.avg_rent_received_per_turn(player) << "/turn  \t"
 			<< "    +" << statistics.avg_rent_received_per_rent(player) << "/rent\n"
-			<< "    -" << statistics.avg_rent_paid_per_game(player) << "/game  \t"
 			<< "    -" << statistics.avg_rent_paid_per_turn(player) << "/turn  \t"
 			<< "    -" << statistics.avg_rent_paid_per_rent(player) << "/rent\n";
 	}
@@ -85,19 +106,13 @@ void print_statistics() {
 	std::cout << '\n';
 
 	std::cout << "Avg cash award card amount:\n";
+	// TODO: per-player cards?
 	std::cout << "  " << statistics.avg_cash_award_card_amount_per_cash_award_card() << "/cash_award_card\n";
-	for (auto const player : players) {
-		std::cout << "  Player " << player << ": "
-			<< statistics.avg_cash_award_card_amount_per_game(player) << "/game\n";
-	}
 	std::cout << '\n';
 
 	std::cout << "Avg cash fee card amount:\n";
+	// TODO: per-player cards?
 	std::cout << "  " << statistics.avg_cash_fee_card_amount_per_cash_fee_card() << "/cash_fee_card\n";
-	for (auto const player : players) {
-		std::cout << "  Player " << player << ": "
-			<< statistics.avg_cash_fee_card_amount_per_game(player) << "/game\n";
-	}
 	std::cout << '\n';
 	
 	std::cout << "Avg unowned property auctions won:\n";
