@@ -19,7 +19,7 @@ namespace monopoly {
 
 namespace monopoly::card_effects {
 
-	inline void cash_award(game_state_t& game_state, unsigned const player, unsigned const amount) {
+	inline void cash_award_from_bank(game_state_t& game_state, unsigned const player, unsigned const amount) {
 		bank_pay_player(game_state, player, amount);
 
 		if constexpr (record_stats) {
@@ -30,12 +30,12 @@ namespace monopoly::card_effects {
 		// Turn ends.
 	}
 
-	inline void cash_fee(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	inline void cash_fee_to_bank(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, unsigned const amount) {
-		player_pay_bank(game_state, strategies, random, player, amount);
+		auto const amount_paid = player_pay_bank(game_state, strategies, random, player, amount);
 
 		if constexpr (record_stats) {
-			stat_counters.cash_fee_card_amount[player] += amount;
+			stat_counters.cash_fee_card_amount[player] += amount_paid;
 			stat_counters.cash_fee_cards_drawn[player]++;
 		}
 
@@ -46,7 +46,7 @@ namespace monopoly::card_effects {
 			unsigned const player, unsigned const amount_per_house, unsigned const amount_per_hotel) {
 		auto const& player_state = game_state.players[player];
 		auto const amount = amount_per_house * player_state.houses_owned + amount_per_hotel * player_state.hotels_owned;
-		cash_fee(game_state, strategies, random, player, amount);
+		cash_fee_to_bank(game_state, strategies, random, player, amount);
 		// Turn ends.
 	}
 
@@ -54,9 +54,20 @@ namespace monopoly::card_effects {
 			unsigned const player, unsigned const amount) {
 		for (auto const other_player : players) {
 			if (other_player != player && !game_state.players[other_player].is_bankrupt()) {
-				player_pay_player(game_state, strategies, random, other_player, player, amount);
+				auto const amount_paid =
+					player_pay_player(game_state, strategies, random, other_player, player, amount);
+				if constexpr (record_stats) {
+					stat_counters.cash_award_card_amount[player] += amount_paid;
+					stat_counters.per_player_cash_award_card_payment_amount[other_player] += amount_paid;
+					stat_counters.per_player_cash_award_card_payment_count[other_player]++;
+				}
 			}
 		}
+
+		if constexpr (record_stats) {
+			stat_counters.cash_award_cards_drawn[player]++;
+		}
+
 		// Turn ends.
 	}
 
@@ -64,13 +75,25 @@ namespace monopoly::card_effects {
 			unsigned const player, unsigned const amount) {
 		for (auto const other_player : players) {
 			if (other_player != player && !game_state.players[other_player].is_bankrupt()) {
-				player_pay_player(game_state, strategies, random, player, other_player, amount);
+				auto const amount_paid =
+					player_pay_player(game_state, strategies, random, player, other_player, amount);
+				if constexpr (record_stats) {
+					stat_counters.cash_fee_card_amount[player] += amount_paid;
+					stat_counters.per_player_cash_fee_card_receive_amount[other_player] += amount_paid;
+					stat_counters.per_player_cash_fee_card_receive_count[other_player]++;
+				}
+
 				// If the player goes bankrupt, don't keep trying to pay other players.
 				if (game_state.players[player].is_bankrupt()) {
 					break;
 				}
 			}
 		}
+
+		if constexpr (record_stats) {
+			stat_counters.cash_fee_cards_drawn[player]++;
+		}
+
 		// Turn ends.
 	}
 

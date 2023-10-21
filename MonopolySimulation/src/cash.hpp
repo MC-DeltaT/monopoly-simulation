@@ -60,18 +60,22 @@ namespace monopoly::detail {
 namespace monopoly {
 
 	// Player pays cash to bank. Player may have to sell assets to generate enough cash.
-	inline void player_pay_bank(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	// Returns the amount which the player was able to pay (which could be less than the desired amount).
+	inline unsigned player_pay_bank(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player, unsigned const amount) {
-		detail::raw_debit(game_state, strategies, random, player, amount);
+		auto const amount_yielded = detail::raw_debit(game_state, strategies, random, player, amount);
 
 		if (game_state.players[player].is_bankrupt()) {
 			surrender_assets_to_bank(game_state, player);
 		}
+
+		return amount_yielded;
 	}
 
 	// Player pays cash to another player. Source player may have to sell assets to generate enough cash.
 	// If the source player becomes bankrupt, any remaining assets are transferred to the destination player.
-	inline void player_pay_player(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	// Returns the amount which the player was able to pay (which could be less than the desired amount).
+	inline unsigned player_pay_player(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const src_player, unsigned const dst_player, unsigned const amount) {
 		auto const amount_yielded = detail::raw_debit(game_state, strategies, random, src_player, amount);
 		detail::raw_credit(game_state, dst_player, amount_yielded);
@@ -79,6 +83,8 @@ namespace monopoly {
 		if (game_state.players[src_player].is_bankrupt()) {
 			surrender_assets_to_player(game_state, src_player, dst_player);
 		}
+
+		return amount_yielded;
 	}
 
 

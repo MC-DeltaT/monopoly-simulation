@@ -136,16 +136,32 @@ namespace monopoly {
 		// If a player gets into jail and gets out on the next turn, that counts as 1 turn in jail.
 		per_player_int_count turns_in_jail{};
 
+		// Number of times each player paid the jail fee to leave jail.
+		per_player_int_count jail_fee_paid_count{};
+
 		// Number of cards drawn, for each player.
 		per_player_int_count cards_drawn{};
 
-		// Cash received as a result of immediate cash award cards, for each player.
+		// Cash received as a result of drawing immediate cash award cards, for each player.
+		// Does not include receiving cash from another player who drew the card.
 		per_player_int_count cash_award_card_amount{};
 
 		// Number of cash award cards drawn, for each player.
 		per_player_int_count cash_award_cards_drawn{};
 
-		// Cash paid as a result of immediate cash fee cards, for each player.
+		// Cash received as a result of another player drawing per-player cash fee card.
+		per_player_int_count per_player_cash_fee_card_receive_amount{};
+
+		// Number of times a player received cash from another player drawing a per-player cash fee card.
+		per_player_int_count per_player_cash_fee_card_receive_count{};
+
+		// Cash paid as a result of another player drawing a per-player cash award card.
+		per_player_int_count per_player_cash_award_card_payment_amount{};
+
+		// Number of times a player paid cash to another player drawing a per-player cash award card.
+		per_player_int_count per_player_cash_award_card_payment_count{};
+
+		// Cash paid as a result of drawing immediate cash fee cards, for each player.
 		per_player_int_count cash_fee_card_amount{};
 
 		// Number of cash fee cards drawn, for each player.
@@ -165,6 +181,12 @@ namespace monopoly {
 
 		// Number of times a player won an unowned property auction.
 		per_player_int_count unowned_property_auctions_won{};
+
+		// Cash paid to purchase properties.
+		per_player_int_count property_purchase_costs{};
+
+		// Cash received from selling properties.
+		per_player_int_count property_sell_income{};
 	};
 
 	inline stat_counters_t stat_counters{};

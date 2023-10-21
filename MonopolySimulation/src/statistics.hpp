@@ -4,8 +4,10 @@
 #include <array>
 #include <ranges>
 
+#include "board_space_constants.hpp"
 #include "common_constants.hpp"
 #include "common_types.hpp"
+#include "gameplay_constants.hpp"
 #include "property_values.hpp"
 #include "statistics_counters.hpp"
 
@@ -105,6 +107,29 @@ namespace monopoly {
 		}
 		
 		[[nodiscard]]
+		double avg_jail_fee_per_game_approx(unsigned const player) const {
+			// Approximate, true amount paid not tracked.
+			return div(c->jail_fee_paid_count[player], c->games) * jail_release_cost;
+		}
+
+		[[nodiscard]]
+		double avg_go_salary_per_game(unsigned const player) const {
+			return div(c->go_passes[player], c->games) * go_salary;
+		}
+
+		[[nodiscard]]
+		double avg_tax_space_paid_per_game_approx(unsigned const player) const {
+			// Approximate, true amount paid not tracked.
+			auto const income_tax_count =
+				c->board_space_counts[player][static_cast<unsigned>(board_space_t::income_tax)];
+			auto const income_tax_paid = div(income_tax_count, c->games) * income_tax;
+			auto const super_tax_count =
+				c->board_space_counts[player][static_cast<unsigned>(board_space_t::super_tax)];
+			auto const super_tax_paid = div(super_tax_count, c->games) * super_tax;
+			return income_tax_paid + super_tax_paid;
+		}
+
+		[[nodiscard]]
 		double avg_rent_paid_per_game(unsigned const player) const {
 			return div(c->rent_paid_amount[player], c->games);
 		}
@@ -159,6 +184,8 @@ namespace monopoly {
 			return div(c->cash_fee_card_amount[player], c->games);
 		}
 
+		// TODO: per-player card stats
+
 		template<PropertyType P>
 		[[nodiscard]]
 		auto avg_property_first_purchase_round() const {
@@ -181,7 +208,6 @@ namespace monopoly {
 			return result;
 		}
 
-		// Auction sale premium as a fraction of the property value.
 		template<PropertyType P>
 		[[nodiscard]]
 		auto avg_unowned_property_auction_premium() const {
@@ -215,6 +241,6 @@ namespace monopoly {
 		}
 	};
 
-	inline statistics_t statistics{stat_counters};
+	inline statistics_t const statistics{stat_counters};
 
 }

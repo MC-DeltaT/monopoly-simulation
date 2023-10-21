@@ -28,6 +28,7 @@ namespace monopoly {
 				stat_counters.property_purchased_at_least_once.get<P>()[property_idx]++;
 				stat_counters.property_first_purchase_round.get<P>()[property_idx] += game_state.round + 1;
 			}
+			stat_counters.property_purchase_costs[player] += cost;
 		}
 	}
 

@@ -8,6 +8,7 @@
 #include "game_state.hpp"
 #include "property_query.hpp"
 #include "property_values.hpp"
+#include "statistics_counters.hpp"
 
 
 namespace monopoly {
@@ -18,7 +19,12 @@ namespace monopoly {
 		assert(is_property_sellable(game_state, property));
 
 		game_state.property_ownership.get<P>().set_owner(property, std::nullopt);
-		bank_pay_player(game_state, player, property_sell_value(property));
+		auto const sell_amount = property_sell_value(property);
+		bank_pay_player(game_state, player, sell_amount);
+
+		if constexpr (record_stats) {
+			stat_counters.property_sell_income[player] += sell_amount;
+		}
 	}
 
 

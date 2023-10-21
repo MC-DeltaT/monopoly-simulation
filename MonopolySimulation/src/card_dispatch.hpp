@@ -52,13 +52,13 @@ namespace monopoly {
 			card_effects::receive_get_out_of_jail_free(game_state, player, card_type_t::chance);
 			break;
 		case chance_card_t::bank_dividend:
-			card_effects::cash_award(game_state, player, 50u);
+			card_effects::cash_award_from_bank(game_state, player, 50u);
 			break;
 		case chance_card_t::building_loan_matures:
-			card_effects::cash_award(game_state, player, 150u);
+			card_effects::cash_award_from_bank(game_state, player, 150u);
 			break;
 		case chance_card_t::speeding_fine:
-			card_effects::cash_fee(game_state, strategies, random, player, 15u);
+			card_effects::cash_fee_to_bank(game_state, strategies, random, player, 15u);
 			break;
 		case chance_card_t::elected_chairman:
 			card_effects::cash_fee_to_players(game_state, strategies, random, player, 50u);
@@ -89,40 +89,40 @@ namespace monopoly {
 			card_effects::receive_get_out_of_jail_free(game_state, player, card_type_t::community_chest);
 			break;
 		case community_chest_card_t::won_beauty_contest:
-			card_effects::cash_award(game_state, player, 10u);
+			card_effects::cash_award_from_bank(game_state, player, 10u);
 			break;
 		case community_chest_card_t::income_tax_refund:
-			card_effects::cash_award(game_state, player, 20u);
+			card_effects::cash_award_from_bank(game_state, player, 20u);
 			break;
 		case community_chest_card_t::collect_consultancy_fee:
-			card_effects::cash_award(game_state, player, 25u);
+			card_effects::cash_award_from_bank(game_state, player, 25u);
 			break;
 		case community_chest_card_t::sale_of_stock:
-			card_effects::cash_award(game_state, player, 50u);
+			card_effects::cash_award_from_bank(game_state, player, 50u);
 			break;
 		case community_chest_card_t::inheritance:
-			card_effects::cash_award(game_state, player, 100u);
+			card_effects::cash_award_from_bank(game_state, player, 100u);
 			break;
 		case community_chest_card_t::holiday_fund_matures:
-			card_effects::cash_award(game_state, player, 100u);
+			card_effects::cash_award_from_bank(game_state, player, 100u);
 			break;
 		case community_chest_card_t::life_insurance_matures:
-			card_effects::cash_award(game_state, player, 100u);
+			card_effects::cash_award_from_bank(game_state, player, 100u);
 			break;
 		case community_chest_card_t::bank_error:
-			card_effects::cash_award(game_state, player, 200u);
+			card_effects::cash_award_from_bank(game_state, player, 200u);
 			break;
 		case community_chest_card_t::your_birthday:
 			card_effects::cash_award_from_players(game_state, strategies, random, player, 10u);
 			break;
 		case community_chest_card_t::school_fees:
-			card_effects::cash_fee(game_state, strategies, random, player, 50u);
+			card_effects::cash_fee_to_bank(game_state, strategies, random, player, 50u);
 			break;
 		case community_chest_card_t::doctors_fee:
-			card_effects::cash_fee(game_state, strategies, random, player, 50u);
+			card_effects::cash_fee_to_bank(game_state, strategies, random, player, 50u);
 			break;
 		case community_chest_card_t::hospital_fee:
-			card_effects::cash_fee(game_state, strategies, random, player, 100u);
+			card_effects::cash_fee_to_bank(game_state, strategies, random, player, 100u);
 			break;
 		case community_chest_card_t::street_repairs:
 			card_effects::per_building_cash_fee(game_state, strategies, random, player, 40u, 115u);

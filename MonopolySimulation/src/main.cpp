@@ -42,6 +42,10 @@ void print_statistics() {
 	}
 	std::cout << '\n';
 
+	// TODO: cash payment breakdown
+
+	// TODO: cash received breakdown
+
 	std::cout << "Avg times passed Go per turn:\n";
 	for (auto const player : players) {
 		std::cout << "  Player " << player << ": " << statistics.avg_go_passes_per_turn(player) << '\n';

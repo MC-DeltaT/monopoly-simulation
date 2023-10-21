@@ -85,6 +85,10 @@ namespace monopoly {
 				if (new_position >= 0) {
 					// Time in jail is up, forced to pay to be released.
 					player_pay_bank(game_state, strategies, random, player, jail_release_cost);
+					if constexpr (record_stats) {
+						stat_counters.jail_fee_paid_count[player]++;
+					}
+
 					// May have become bankrupt from paying get out of jail fee.
 					if (player_state.is_bankrupt()) {
 						if constexpr (record_stats) {
