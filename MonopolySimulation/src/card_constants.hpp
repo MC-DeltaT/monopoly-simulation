@@ -29,7 +29,7 @@ namespace monopoly {
 		go_back_3_spaces,
 		// Go to jail.
 		go_to_jail,
-		// Get Out of Jail Free.
+		// Get Out Of Jail Free.
 		get_out_of_jail_free,
 		// Bank dividend, +$50.
 		bank_dividend,
@@ -50,7 +50,7 @@ namespace monopoly {
 		advance_to_go,
 		// Go to jail.
 		go_to_jail,
-		// Get Out of Jail Free.
+		// Get Out Of Jail Free.
 		get_out_of_jail_free,
 		// Won 2nd prize in beauty contest, +$10.
 		won_beauty_contest,

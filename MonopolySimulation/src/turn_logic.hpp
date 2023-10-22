@@ -18,6 +18,8 @@
 
 namespace monopoly {
 
+	// TODO: extra move on doubles
+
 	inline void normal_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto& player_state = game_state.players[player];
@@ -52,28 +54,50 @@ namespace monopoly {
 		assert(player_state.in_jail());
 
 		// The rules about getting out of jail seem to be ambiguous or not well agreed upon.
-		// What is implemented here is:
-		// At the start of each turn in jail, the player decides what they want to do, either try to roll doubles or
-		// use a Get Out of Jail Free card.
-		// If the player chooses to try to roll doubles and fails, they cannot use Get Out of Jail Free on that turn.
-		// On the last turn in jail, if the player chose to try to roll doubles and failed, they must pay the fine.
-		// After using a Get Out of Jail Free card, the player rolls and takes their turn as normal.
+		// What is implemented here is as follows.
+		// At the start of each turn in jail, the player decides what they want to do:
+		//   - pay fine
+		//   - use Get Out Of Jail Free card
+		//   - try to roll doubles
+		// After choosing to pay the fine or use a Get Out Of Jail Free card, the roll and move immediately.
+		// If choosing to roll doubles:
+		//   - if successful, use that roll to move
+		//   - if unsuccessful:
+		//       - if last turn allowable turn in jail, pay fine and use that roll to move
+		//       - else forfeit turn
 
-		std::optional<card_type_t> used_get_out_of_jail_free_card;
-		if (game_state.get_out_of_jail_free_ownership.owns_any(player)) {
-			used_get_out_of_jail_free_card = strategies.visit(player,
-				[&game_state, &random](PlayerStrategy auto& strategy) {
-					return strategy.should_use_get_out_of_jail_free(game_state, random);
-				});
-		}
+		auto const jail_action = strategies.visit(player,
+			[&game_state, &random](PlayerStrategy auto& strategy) {
+				return strategy.decide_jail_action(game_state, random);
+			});
 
 		unsigned roll;
-		if (used_get_out_of_jail_free_card.has_value()) {
-			assert(game_state.get_out_of_jail_free_ownership.is_owner(player, *used_get_out_of_jail_free_card));
-			game_state.get_out_of_jail_free_ownership.set_owner(*used_get_out_of_jail_free_card, std::nullopt);
+
+		auto const use_get_out_of_jail_free_card = [&game_state, &random, player, &roll]<card_type_t C>() {
+			assert(game_state.get_out_of_jail_free_ownership.is_owner(player, C));
+			game_state.get_out_of_jail_free_ownership.set_owner(C, std::nullopt);
+			game_state.card_deck<C>().return_get_out_of_jail_free();
 			roll = random.single_dice_roll();
+		};
+
+		switch (jail_action) {
+		case in_jail_action_t::pay_fine: {
+			player_pay_bank_from_hand(game_state, player, jail_release_cost);
+			if constexpr (record_stats) {
+				stat_counters.jail_fee_paid_count[player]++;
+			}
+			break;
 		}
-		else {
+
+		case in_jail_action_t::get_out_of_jail_free_chance:
+			use_get_out_of_jail_free_card.operator()<card_type_t::chance>();
+			break;
+
+		case in_jail_action_t::get_out_of_jail_free_community_chest:
+			use_get_out_of_jail_free_card.operator()<card_type_t::community_chest>();
+			break;
+
+		case in_jail_action_t::roll_doubles: {
 			auto const [double_roll, is_double] = random.double_dice_roll();
 			if (is_double) {
 				// Released from jail for free.
@@ -106,7 +130,15 @@ namespace monopoly {
 					return;
 				}
 			}
+			break;
 		}
+
+		default:
+			assert(false);
+			break;
+		}
+
+		// If we get here then player is being released from jail.
 
 		if constexpr (record_stats) {
 			assert(std::cmp_greater_equal(player_state.position, -static_cast<long>(max_turns_in_jail)));

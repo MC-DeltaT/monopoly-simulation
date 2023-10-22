@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <limits>
-#include <utility>
 
 
 namespace monopoly {
@@ -31,8 +30,13 @@ namespace monopoly {
 			return s;
 		}
 
+		struct double_dice_roll_result_t {
+			unsigned roll;
+			bool is_double;
+		};
+
 		[[nodiscard]]
-		constexpr std::pair<unsigned, bool> double_dice_roll() noexcept {
+		constexpr double_dice_roll_result_t double_dice_roll() noexcept {
 			auto const r = (*this)();
 			auto const dice1 = static_cast<unsigned>(r % 6u);
 			auto const dice2 = static_cast<unsigned>((r >> 8u) % 6u);

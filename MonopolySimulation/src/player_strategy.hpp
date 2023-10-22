@@ -2,13 +2,11 @@
 
 #include <cassert>
 #include <concepts>
-#include <optional>
 #include <tuple>
 #include <utility>
 
 #include "common_types.hpp"
 #include "game_state.hpp"
-#include "gameplay_constants.hpp"
 #include "generic_sell_to_bank_iface.hpp"
 #include "property_query.hpp"
 #include "property_values.hpp"
@@ -19,6 +17,13 @@
 namespace monopoly {
 
 	using sell_to_bank_choices_t = static_vector<generic_sell_to_bank_t, 8>;
+
+	enum class in_jail_action_t {
+		pay_fine,
+		get_out_of_jail_free_chance,
+		get_out_of_jail_free_community_chest,
+		roll_doubles
+	};
 
 
 	template<typename T>
@@ -37,9 +42,9 @@ namespace monopoly {
 		{ t.bid_on_unowned_property(game, random, railway, auction) } -> std::same_as<unsigned>;
 		{ t.bid_on_unowned_property(game, random, utility, auction) } -> std::same_as<unsigned>;
 
-		// Picks a Get Out Of Jail Free card to use, if any.
-		// Will only be called if the player owns at least one card. Must not return an unowned card.
-		{ t.should_use_get_out_of_jail_free(game, random) } -> std::same_as<std::optional<card_type_t>>;
+		// Decide what to do on a jail turn.
+		// Will only be called in the player has enough cash to pay the fine, or if owning a Get Out Of Jail Free card.
+		{ t.decide_jail_action(game, random) } -> std::same_as<in_jail_action_t>;
 
 		// Pick assets to sell to generate the specified amount of cash. Assets will be sold in order.
 		// Must not pick assets that the player doesn't own or are unsellable.
@@ -48,34 +53,18 @@ namespace monopoly {
 	};
 
 
-	// Always use Get Out Of Jail Free (if the player has one) after a fixed number of turns in jail.
-	struct turn_based_jail_strategy_t {
-		// Turn in jail on which to use Get Out Of Jail Free card.
-		// 0 is the first turn, and so on.
-		unsigned use_get_out_of_jail_free_turn;
-
+	// Always use Get Out Of Jail Free if the player has one, otherwise roll doubles.
+	struct always_use_card_jail_strategy_t {
 		[[nodiscard]]
-		std::optional<card_type_t> should_use_get_out_of_jail_free(game_state_t const& game_state, random_t&,
-				unsigned const player) const {
-			assert(game_state.get_out_of_jail_free_ownership.owns_any(player));
-			
-			auto const position = game_state.players[player].position;
-			assert(std::cmp_less(position, 0));
-			auto const turn_in_jail = position + static_cast<long>(max_turns_in_jail);
-			auto const use_card = std::cmp_greater_equal(turn_in_jail, use_get_out_of_jail_free_turn);
-
-			if (use_card) {
-				if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
-					return card_type_t::chance;
-				}
-				else {
-					// This function shouldn't be called unless the player owns at least 1 card.
-					assert(game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest));
-					return card_type_t::community_chest;
-				}
+		in_jail_action_t decide_jail_action(game_state_t const& game_state, random_t&, unsigned const player) const {
+			if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
+				return in_jail_action_t::get_out_of_jail_free_chance;
+			}
+			else if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest)) {
+				return in_jail_action_t::get_out_of_jail_free_community_chest;
 			}
 			else {
-				return std::nullopt;
+				return in_jail_action_t::roll_doubles;
 			}
 		}
 	};
@@ -84,9 +73,8 @@ namespace monopoly {
 	// Always try to roll doubles to get out of jail.
 	struct always_roll_jail_strategy_t {
 		[[nodiscard]]
-		static constexpr std::optional<card_type_t> should_use_get_out_of_jail_free(game_state_t const&, random_t&,
-				unsigned const) noexcept {
-			return std::nullopt;
+		static constexpr in_jail_action_t decide_jail_action(game_state_t const&, random_t&, unsigned const) noexcept {
+			return in_jail_action_t::roll_doubles;
 		}
 	};
 
@@ -216,48 +204,6 @@ namespace monopoly {
 	};
 
 
-	struct test_player_strategy_t {
-		unsigned player;
-
-		[[nodiscard]]
-		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
-				PropertyType auto const property) {
-			random_unowned_property_buy_strategy_t strategy{0.5};
-			return strategy.should_buy_unowned_property(game_state, random, player, property);
-		}
-
-		[[nodiscard]]
-		unsigned bid_on_unowned_property(game_state_t const& game_state, random_t& random,
-				PropertyType auto const property, auction_state_t const& auction) {
-			random_unowned_property_bid_strategy_t strategy{0, 1.0};
-			return strategy.bid_on_unowned_property(game_state, random, player, property, auction);
-		}
-
-		[[nodiscard]]
-		std::optional<card_type_t> should_use_get_out_of_jail_free(game_state_t const& game_state, random_t& random) {
-			assert(game_state.get_out_of_jail_free_ownership.owns_any(player));
-			// 50% chance of using the first card (and 50% chance of trying to roll doubles).
-			if (random.uniform_bool()) {
-				if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
-					return card_type_t::chance;
-				}
-				else {
-					// This function shouldn't be called unless the player owns at least 1 card.
-					assert(game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest));
-					return card_type_t::community_chest;
-				}
-			}
-			return std::nullopt;
-		}
-
-		[[nodiscard]]
-		sell_to_bank_choices_t choose_assets_for_forced_sale(game_state_t const& game_state,
-				[[maybe_unused]] random_t& random, unsigned const min_amount) {
-			return basic_forced_sale_strategy_t{}.choose_assets_for_forced_sale(game_state, random, player, min_amount);
-		}
-	};
-
-
 	template<
 		auto JailStrategy, auto UnownedPropertyBuyStrategy, auto UnownedPropertyBidStrategy, auto ForcedSaleStrategy> 
 	struct flexible_player_strategy_t {
@@ -276,8 +222,8 @@ namespace monopoly {
 		}
 
 		[[nodiscard]]
-		std::optional<card_type_t> should_use_get_out_of_jail_free(game_state_t const& game_state, random_t& random) {
-			return JailStrategy.should_use_get_out_of_jail_free(game_state, random, player);
+		in_jail_action_t decide_jail_action(game_state_t const& game_state, random_t& random) {
+			return JailStrategy.decide_jail_action(game_state, random, player);
 		}
 
 		[[nodiscard]]
@@ -291,22 +237,22 @@ namespace monopoly {
 	struct player_strategies_t {
 		std::tuple<
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
+				always_use_card_jail_strategy_t{},
 				dont_buy_unowned_property_buy_strategy_t{},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
+				always_use_card_jail_strategy_t{},
 				dont_buy_unowned_property_buy_strategy_t{},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
+				always_use_card_jail_strategy_t{},
 				dont_buy_unowned_property_buy_strategy_t{},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
+				always_use_card_jail_strategy_t{},
 				dont_buy_unowned_property_buy_strategy_t{},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>
@@ -336,6 +282,11 @@ namespace monopoly {
 		// Copying in other contexts is most likely a mistake.
 		player_strategies_t(player_strategies_t const&) = default;
 		player_strategies_t& operator=(player_strategies_t const&) = default;
+
+		static_assert(PlayerStrategy<std::tuple_element_t<0, decltype(strategies)>>);
+		static_assert(PlayerStrategy<std::tuple_element_t<1, decltype(strategies)>>);
+		static_assert(PlayerStrategy<std::tuple_element_t<2, decltype(strategies)>>);
+		static_assert(PlayerStrategy<std::tuple_element_t<3, decltype(strategies)>>);
 	};
 
 }

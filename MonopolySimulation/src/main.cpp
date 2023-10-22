@@ -106,12 +106,10 @@ void print_statistics() {
 	std::cout << '\n';
 
 	std::cout << "Avg cash award card amount:\n";
-	// TODO: per-player cards?
 	std::cout << "  " << statistics.avg_cash_award_card_amount_per_cash_award_card() << "/cash_award_card\n";
 	std::cout << '\n';
 
 	std::cout << "Avg cash fee card amount:\n";
-	// TODO: per-player cards?
 	std::cout << "  " << statistics.avg_cash_fee_card_amount_per_cash_fee_card() << "/cash_fee_card\n";
 	std::cout << '\n';
 	

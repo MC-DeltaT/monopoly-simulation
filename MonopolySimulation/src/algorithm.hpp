@@ -5,10 +5,12 @@
 #include <cstddef>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 
 namespace monopoly {
-
+	
+	// Produces array of indices of elements as if they were sorted.
 	template<typename T, std::size_t N, typename F = std::identity>
 	std::array<std::size_t, N> sorted_indices(std::array<T, N> const& data, F transform = std::identity{}) {
 		std::array<std::size_t, N> indices;
@@ -30,6 +32,16 @@ namespace monopoly {
 			}
 		}
 		return true;
+	}
+
+
+	// Bad but fast shuffle.
+	template<typename T, std::size_t N>
+	void fast_shuffle(std::array<T, N>& arr, auto& random_engine) {
+		for (std::size_t i = 0; i < N; ++i) {
+			auto const new_idx = random_engine() % N;
+			std::swap(arr[i], arr[new_idx]);
+		}
 	}
 
 }

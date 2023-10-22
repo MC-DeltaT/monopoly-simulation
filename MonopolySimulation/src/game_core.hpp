@@ -15,6 +15,8 @@
 
 namespace monopoly {
 
+	// TODO: decide player turn order by dice roll at start of game
+
 	inline void do_round(game_state_t& game_state, player_strategies_t& strategies, random_t& random) {
 		for (auto const player : players) {
 			auto& player_state = game_state.players[player];
