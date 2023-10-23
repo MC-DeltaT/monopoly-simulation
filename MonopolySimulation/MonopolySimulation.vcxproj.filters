@@ -3,7 +3,7 @@
   <ItemGroup>
     <ClInclude Include="src\board_utility.hpp" />
     <ClInclude Include="src\board_space_dispatch.hpp" />
-    <ClInclude Include="src\card_draw.hpp" />
+    <ClInclude Include="src\card_deck_operations.hpp" />
     <ClInclude Include="src\card_dispatch.hpp" />
     <ClInclude Include="src\cash.hpp" />
     <ClInclude Include="src\game_analysis.hpp" />

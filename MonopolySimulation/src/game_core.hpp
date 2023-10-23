@@ -4,6 +4,7 @@
 #include <optional>
 #include <utility>
 
+#include "algorithm.hpp"
 #include "common_constants.hpp"
 #include "game_state.hpp"
 #include "player_strategy.hpp"
@@ -72,8 +73,8 @@ namespace monopoly {
 
 	inline void reset_for_new_game(game_state_t& game_state, random_t& random) {
 		game_state = game_state_t{};
-		game_state.chance_deck.shuffle(random);
-		game_state.community_chest_deck.shuffle(random);
+		fast_shuffle(game_state.chance_deck.cards, random);
+		fast_shuffle(game_state.community_chest_deck.cards, random);
 	}
 
 

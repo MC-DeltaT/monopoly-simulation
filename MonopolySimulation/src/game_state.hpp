@@ -9,7 +9,6 @@
 #include <optional>
 #include <utility>
 
-#include "algorithm.hpp"
 #include "card_constants.hpp"
 #include "common_constants.hpp"
 #include "common_types.hpp"
@@ -319,71 +318,35 @@ namespace monopoly {
 	};
 
 
-	// TODO: maybe get rid of this class, move card logic into free functions
-	template<typename CardType, CardType GetOutOfJailFree, unsigned Size>
+	template<typename CardType, unsigned Size>
 	class card_deck_t {
 	public:
 		static_assert(Size > 0);
-		static_assert(static_cast<unsigned long long>(GetOutOfJailFree) < Size);
+
+		static constexpr unsigned size = Size;
+
+		std::array<CardType, Size> cards;
+		unsigned top_index = 0;	// Next card to draw.
+		// Only set when Get Out Of Jail Free card has been drawn.
+		std::optional<unsigned> get_out_of_jail_free_index = std::nullopt;
+
+		static_assert(std::cmp_less_equal(Size - 1, std::numeric_limits<decltype(top_index)>::max()));
 
 		constexpr card_deck_t() noexcept {
 			for (unsigned i = 0; i < Size; ++i) {
-				_cards[i] = CardType{i};
+				cards[i] = CardType{i};
 			}
 		}
 
 		[[nodiscard]]
-		constexpr CardType draw_card(bool const is_get_out_of_jail_free_owned) noexcept {
-			assert(is_get_out_of_jail_free_owned == _get_out_of_jail_free_taken);
-
-			auto card = _cards[_top_index];
-			if (card == GetOutOfJailFree) {
-				if (is_get_out_of_jail_free_owned) {
-					// If the card is Get Out Of Jail Free and it's already taken, try again.
-					_inc_top();
-					card = _cards[_top_index];
-					assert(card != GetOutOfJailFree);
-				}
-				else {
-					_get_out_of_jail_free_index = _top_index;
-#ifndef NDEBUG
-					_get_out_of_jail_free_taken = true;
-#endif
-				}
-			}
-			_inc_top();
+		constexpr CardType next_card() {
+			auto const card = cards[top_index];
+			inc_top_index();
 			return card;
 		}
 
-		// Places the Get Out Of Jail Free card at the back of the deck.
-		// The card must have been drawn from the deck previously.
-		constexpr void return_get_out_of_jail_free() {
-			assert(_get_out_of_jail_free_taken);
-
-			// TODO
-
-#ifndef NDEBUG
-			_get_out_of_jail_free_taken = false;
-#endif
-		}
-
-		void shuffle(auto& random_engine) {
-			fast_shuffle(_cards, random_engine);
-		}
-
-	private:
-		std::array<CardType, Size> _cards;
-		unsigned _top_index = 0;	// Next card to draw.
-		unsigned _get_out_of_jail_free_index = 0;	// Only valid when Get Out Of Jail Free card has been drawn.
-#ifndef NDEBUG
-		// Don't want to track this in an optimised build because that's redundant state!
-		bool _get_out_of_jail_free_taken = false;
-#endif
-
-		static_assert(std::cmp_less_equal(Size - 1, std::numeric_limits<decltype(_top_index)>::max()));
-
-		constexpr void _inc_top() noexcept {
-			_top_index = (_top_index + 1u) % Size;
+		constexpr void inc_top_index() noexcept {
+			top_index = (top_index + 1u) % Size;
 		}
 	};
 
@@ -485,9 +448,8 @@ namespace monopoly {
 		utility_development_t utility_development;
 		// unsigned houses_available = total_houses;
 		// unsigned hotels_available = total_hotels;
-		card_deck_t<chance_card_t, chance_card_t::get_out_of_jail_free, chance_card_count> chance_deck;
-		card_deck_t<community_chest_card_t, community_chest_card_t::get_out_of_jail_free, community_chest_card_count>
-			community_chest_deck;
+		card_deck_t<chance_card_t, chance_card_count> chance_deck;
+		card_deck_t<community_chest_card_t, community_chest_card_count> community_chest_deck;
 		get_out_of_jail_free_card_ownership_t get_out_of_jail_free_ownership;
 		unsigned round = 0;
 		turn_state_t turn;

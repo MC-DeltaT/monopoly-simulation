@@ -32,16 +32,16 @@ namespace monopoly {
 		// Can't use this to advance to Go, because Go is handled separately.
 		assert(space != board_space_t::go);
 
-		auto const go_passes = advance_position_absolute(game_state, player, static_cast<unsigned>(space));
-		if (go_passes) {
+		auto const go_passed = advance_position_absolute(game_state, player, static_cast<unsigned>(space));
+		if (go_passed) {
 			detail::on_passed_go(game_state, player);
 		}
 	}
 
 	// Advances the player's position by a number of board spaces, paying the Go salary if passing Go.
 	inline void advance_by_spaces(game_state_t& game_state, unsigned const player, unsigned const offset) {
-		auto const go_passes = advance_position_relative(game_state, player, offset);
-		if (go_passes) {
+		auto const go_passed = advance_position_relative(game_state, player, offset);
+		if (go_passed) {
 			detail::on_passed_go(game_state, player);
 		}
 	}
@@ -49,8 +49,8 @@ namespace monopoly {
 	// Advances the player's position by a number of board spaces.
 	// Assumes the movement will not advance the player past Go (i.e. never pays the Go salary).
 	inline void advance_by_spaces_no_go(game_state_t& game_state, unsigned player, unsigned const offset) {
-		[[maybe_unused]] auto const go_passes = advance_position_relative(game_state, player, offset);
-		assert(!go_passes);
+		[[maybe_unused]] auto const go_passed = advance_position_relative(game_state, player, offset);
+		assert(!go_passed);
 	}
 
 	// Moves the player's position back by a number of board spaces.

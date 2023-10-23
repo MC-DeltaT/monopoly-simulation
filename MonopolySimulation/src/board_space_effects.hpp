@@ -1,7 +1,7 @@
 #pragma once
 
+#include "card_deck_operations.hpp"
 #include "card_dispatch.hpp"
-#include "card_draw.hpp"
 #include "cash.hpp"
 #include "common_types.hpp"
 #include "game_state.hpp"

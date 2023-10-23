@@ -5,6 +5,7 @@
 
 #include "board_space_constants.hpp"
 #include "board_space_dispatch.hpp"
+#include "card_deck_operations.hpp"
 #include "cash.hpp"
 #include "common_types.hpp"
 #include "game_state.hpp"
@@ -75,8 +76,7 @@ namespace monopoly {
 
 		auto const use_get_out_of_jail_free_card = [&game_state, &random, player, &roll]<card_type_t C>() {
 			assert(game_state.get_out_of_jail_free_ownership.is_owner(player, C));
-			game_state.get_out_of_jail_free_ownership.set_owner(C, std::nullopt);
-			game_state.card_deck<C>().return_get_out_of_jail_free();
+			return_get_out_of_jail_free_card<C>(game_state);
 			roll = random.single_dice_roll();
 		};
 
