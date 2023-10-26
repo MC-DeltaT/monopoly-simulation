@@ -432,10 +432,14 @@ namespace monopoly {
 
 
 	struct turn_state_t {
+		// Note if the player gets an extra turn due to rolling doubles, that's a new "turn" and this state is reset.
+
 		unsigned movement_roll = 0;
 		unsigned railway_rent_multiplier = 1;		// Applied by the "advance to next railway" card.
 		unsigned utility_rent_dice_multiplier_override = 0;		// Applied by the "advance to next utility" card.
+#ifndef NDEBUG
 		bool position_changed = false;
+#endif
 	};
 
 

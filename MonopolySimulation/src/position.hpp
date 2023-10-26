@@ -19,7 +19,9 @@ namespace monopoly {
 
 		player_state.position = position;
 
+#ifndef NDEBUG
 		game_state.turn.position_changed = true;
+#endif
 
 		if constexpr (record_stats) {
 			if (position >= 0) {

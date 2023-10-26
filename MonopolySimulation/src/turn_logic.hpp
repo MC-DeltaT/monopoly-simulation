@@ -19,12 +19,13 @@
 
 namespace monopoly {
 
-	// TODO: extra move on doubles
-
-	inline void normal_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	// Return value indicates if the player gets another turn due to rolling doubles.
+	[[nodiscard]]
+	inline bool normal_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto& player_state = game_state.players[player];
 		assert(!player_state.in_jail());
+		assert(!player_state.is_bankrupt());
 
 		auto const [roll, is_double] = random.double_dice_roll();
 
@@ -34,7 +35,7 @@ namespace monopoly {
 				player_state.consecutive_doubles = 0;
 				go_to_jail(game_state, player);
 				// Turn ends.
-				return;
+				return false;
 			}
 			else {
 				player_state.consecutive_doubles = consecutive_doubles;
@@ -47,12 +48,16 @@ namespace monopoly {
 		game_state.turn.movement_roll = roll;
 		advance_by_spaces(game_state, player, roll);
 		on_board_space(game_state, strategies, random, player);
+
+		// Presumably if the player is sent to jail they don't get another turn.
+		return is_double && !player_state.in_jail() && !player_state.is_bankrupt();
 	}
 
 	inline void jail_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto& player_state = game_state.players[player];
 		assert(player_state.in_jail());
+		assert(!player_state.is_bankrupt());
 
 		// The rules about getting out of jail seem to be ambiguous or not well agreed upon.
 		// What is implemented here is as follows.
@@ -157,7 +162,9 @@ namespace monopoly {
 		on_board_space(game_state, strategies, random, player);
 	}
 
-	inline void do_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	// Return value indicates if the player gets another turn due to rolling doubles.
+	[[nodiscard]]
+	inline bool do_single_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto const& player_state = game_state.players[player];
 		assert(!player_state.is_bankrupt());
@@ -169,15 +176,32 @@ namespace monopoly {
 		// TODO: opportunity to do OTC property trades
 		// TODO: opportunity to do OTC Get Out of Jail Free card trades
 
+		bool extra_turn = false;
 		if (player_state.in_jail()) {
 			jail_turn(game_state, strategies, random, player);
 		}
 		else {
-			normal_turn(game_state, strategies, random, player);
+			extra_turn = normal_turn(game_state, strategies, random, player);
 		}
 
 		// Sanity check, player's position should always change each turn, unless they are bankrupt.
 		assert(game_state.turn.position_changed || player_state.is_bankrupt());
+
+		if constexpr (record_stats) {
+			stat_counters.turns_played[player]++;
+		}
+
+		return extra_turn;
+	}
+
+	inline void do_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+			unsigned const player) {
+		while (true) {
+			auto const extra_turn = do_single_turn(game_state, strategies, random, player);
+			if (!extra_turn) {
+				break;
+			}
+		}
 	}
 
 }

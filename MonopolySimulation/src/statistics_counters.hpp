@@ -102,6 +102,7 @@ namespace monopoly {
 
 		// Number of turns played, for each player.
 		// This includes all turns (including in jail) when the player is not bankrupt.
+		// Extra turns from rolling doubles count multiple times.
 		per_player_int_count turns_played{};
 
 		// Number of times passed Go and collected Go salary, for each player.
