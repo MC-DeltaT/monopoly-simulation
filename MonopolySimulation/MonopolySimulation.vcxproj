@@ -49,6 +49,8 @@
     <ClInclude Include="src\safe_numeric.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\math.hpp" />
+    <ClCompile Include="src\strategy_probability.hpp" />
     <ClInclude Include="src\property_constants.hpp" />
     <ClInclude Include="src\board_space_constants.hpp" />
     <ClInclude Include="src\common_constants.hpp" />

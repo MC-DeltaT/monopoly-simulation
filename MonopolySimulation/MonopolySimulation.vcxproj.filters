@@ -45,5 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\strategy_probability.hpp" />
+    <ClCompile Include="src\math.hpp" />
   </ItemGroup>
 </Project>

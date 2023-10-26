@@ -1,13 +1,12 @@
 #pragma once
 
-#include <algorithm>
 #include <array>
-#include <ranges>
 
 #include "board_space_constants.hpp"
 #include "common_constants.hpp"
 #include "common_types.hpp"
 #include "gameplay_constants.hpp"
+#include "math.hpp"
 #include "property_values.hpp"
 #include "statistics_counters.hpp"
 
@@ -245,18 +244,6 @@ namespace monopoly {
 
 	private:
 		stat_counters_t const* c;
-		
-		template<typename T1, typename T2>
-		[[nodiscard]]
-		static double div(T1 const lhs, T2 const rhs) noexcept {
-			return static_cast<double>(lhs) / static_cast<double>(rhs);
-		}
-		
-		template<std::ranges::range R>
-		[[nodiscard]]
-		static std::ranges::range_value_t<R> sum(R const& r) {
-			return std::accumulate(std::ranges::begin(r), std::ranges::end(r), std::ranges::range_value_t<R>{});
-		}
 	};
 
 	inline statistics_t const statistics{stat_counters};
