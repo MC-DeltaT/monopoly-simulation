@@ -237,7 +237,7 @@ namespace monopoly {
 	struct player_strategies_t {
 		std::tuple<
 			flexible_player_strategy_t<
-				always_use_card_jail_strategy_t{},
+				always_roll_jail_strategy_t{},
 				dont_buy_unowned_property_buy_strategy_t{},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
@@ -247,7 +247,7 @@ namespace monopoly {
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				always_use_card_jail_strategy_t{},
+				always_roll_jail_strategy_t{},
 				dont_buy_unowned_property_buy_strategy_t{},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,

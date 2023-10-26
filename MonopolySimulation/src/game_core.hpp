@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <limits>
+#include <numeric>
 #include <optional>
 #include <utility>
 
@@ -16,10 +18,16 @@
 
 namespace monopoly {
 
-	// TODO: decide player turn order by dice roll at start of game
+	inline std::array<unsigned, player_count> generate_player_order(random_t& random) {
+		std::array<unsigned, player_count> order;
+		std::iota(order.begin(), order.end(), 0u);
+		fast_shuffle(order, random);
+		return order;
+	}
 
-	inline void do_round(game_state_t& game_state, player_strategies_t& strategies, random_t& random) {
-		for (auto const player : players) {
+	inline void do_round(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+			std::array<unsigned, player_count> const& player_order) {
+		for (auto const player : player_order) {
 			auto& player_state = game_state.players[player];
 			if (!player_state.is_bankrupt()) {
 				do_turn(game_state, strategies, random, player);
@@ -52,7 +60,8 @@ namespace monopoly {
 			<= std::numeric_limits<decltype(game_state_t::round)>::max());
 
 		while (true) {
-			do_round(game_state, strategies, random);
+			auto const player_order = generate_player_order(random);
+			do_round(game_state, strategies, random, player_order);
 			if (is_game_done(game_state, max_rounds)) {
 				break;
 			}
