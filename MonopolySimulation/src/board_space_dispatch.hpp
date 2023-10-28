@@ -20,7 +20,7 @@ namespace monopoly {
 		
 		switch (player_state.get_board_space()) {
 		case board_space_t::go:
-			board_effects::on_go_space();
+			board_effects::on_go_space(game_state);
 			break;
 		case board_space_t::old_kent_road:
 			board_effects::on_property_space(game_state, strategies, random, player, std::get<0>(streets));

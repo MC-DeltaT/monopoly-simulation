@@ -170,6 +170,7 @@ namespace monopoly {
 		assert(!player_state.is_bankrupt());
 		
 		game_state.turn = turn_state_t{};
+		game_state.turn.player = player;
 
 		// TODO: opportunity to build/sell houses and hotels
 		// TODO: opportunity to mortgage/unmortgage properties

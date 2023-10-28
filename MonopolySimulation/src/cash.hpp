@@ -91,6 +91,8 @@ namespace monopoly {
 	// Pays the player the Go salary from the bank.
 	inline void pay_go_salary(game_state_t& game_state, unsigned const player) {
 		bank_pay_player(game_state, player, go_salary);
+		assert(player == game_state.turn.player);
+		game_state.turn.go_salary_paid = true;
 	}
 
 }

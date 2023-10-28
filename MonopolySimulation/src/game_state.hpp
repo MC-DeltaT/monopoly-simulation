@@ -438,7 +438,9 @@ namespace monopoly {
 		unsigned railway_rent_multiplier = 1;		// Applied by the "advance to next railway" card.
 		unsigned utility_rent_dice_multiplier_override = 0;		// Applied by the "advance to next utility" card.
 #ifndef NDEBUG
+		unsigned player = ~0u;
 		bool position_changed = false;
+		bool go_salary_paid = false;
 #endif
 	};
 

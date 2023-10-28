@@ -43,8 +43,9 @@ namespace monopoly::board_effects {
 	}
 
 
-	inline void on_go_space() {
+	inline void on_go_space(game_state_t const& game_state) {
 		// The Go salary is paid previously when the player lands on Go, so nothing is required here.
+		assert(game_state.turn.go_salary_paid);
 		// Turn ends.
 	}
 

@@ -42,10 +42,11 @@
     <ClInclude Include="src\board_space_names.hpp" />
     <ClInclude Include="src\per_propertytype_data.hpp" />
     <ClInclude Include="src\algorithm.hpp" />
+    <ClInclude Include="src\basic_ev_strategy.hpp" />
+    <ClInclude Include="src\math.hpp" />
+    <ClInclude Include="src\strategy_types.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\strategy_probability.hpp" />
-    <ClCompile Include="src\math.hpp" />
   </ItemGroup>
 </Project>
