@@ -12,6 +12,9 @@ namespace monopoly {
 
 	// Updates the player's position to the specified value.
 	inline void update_position(game_state_t& game_state, unsigned const player, int const position) {
+		// Only the player whose turn it is should be moving.
+		assert(game_state.turn.player == player);
+
 		auto& player_state = game_state.players[player];
 		// Probably shouldn't be trying to set position to the current position.
 		assert(player_state.position != position);

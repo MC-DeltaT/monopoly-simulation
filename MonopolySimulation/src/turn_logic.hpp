@@ -53,7 +53,8 @@ namespace monopoly {
 		return is_double && !player_state.in_jail() && !player_state.is_bankrupt();
 	}
 
-	inline void jail_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
+	// Return value indicates if the player gets another turn due to rolling doubles.
+	inline bool jail_turn(game_state_t& game_state, player_strategies_t& strategies, random_t& random,
 			unsigned const player) {
 		auto& player_state = game_state.players[player];
 		assert(player_state.in_jail());
@@ -65,7 +66,8 @@ namespace monopoly {
 		//   - pay fine
 		//   - use Get Out Of Jail Free card
 		//   - try to roll doubles
-		// After choosing to pay the fine or use a Get Out Of Jail Free card, the roll and move immediately.
+		// After choosing to pay the fine or use a Get Out Of Jail Free card, they roll and move immediately.
+		// In this scenario a doubles roll results in another turn.
 		// If choosing to roll doubles:
 		//   - if successful, use that roll to move
 		//   - if unsuccessful:
@@ -77,12 +79,12 @@ namespace monopoly {
 				return strategy.decide_jail_action(game_state, random);
 			});
 
-		unsigned roll;
+		// No matter what happens, the player gets to roll. Either to try to get out of jail, or to move normally.
+		auto const roll = random.double_dice_roll();
 
-		auto const use_get_out_of_jail_free_card = [&game_state, &random, player, &roll]<card_type_t C>() {
+		auto const use_get_out_of_jail_free_card = [&game_state, player]<card_type_t C>() {
 			assert(game_state.get_out_of_jail_free_ownership.is_owner(player, C));
 			return_get_out_of_jail_free_card<C>(game_state);
-			roll = random.single_dice_roll();
 		};
 
 		switch (jail_action) {
@@ -103,12 +105,7 @@ namespace monopoly {
 			break;
 
 		case in_jail_action_t::roll_doubles: {
-			auto const [double_roll, is_double] = random.double_dice_roll();
-			if (is_double) {
-				// Released from jail for free.
-				roll = double_roll;
-			}
-			else {
+			if (!roll.is_double) {
 				auto const new_position = player_state.position + 1;
 				assert(new_position <= 0);
 				if (new_position >= 0) {
@@ -124,15 +121,14 @@ namespace monopoly {
 							stat_counters.turns_in_jail[player] += max_turns_in_jail;
 						}
 						// Turn ends.
-						return;
+						return false;
 					}
-					roll = double_roll;
 				}
 				else {
 					// Stil in jail.
 					update_position(game_state, player, new_position);
 					// Turn ends.
-					return;
+					return false;
 				}
 			}
 			break;
@@ -148,18 +144,30 @@ namespace monopoly {
 		if constexpr (record_stats) {
 			assert(std::cmp_greater_equal(player_state.position, -static_cast<long>(max_turns_in_jail)));
 			assert(std::cmp_less(player_state.position, 0));
-			stat_counters.turns_in_jail[player] += player_state.position + static_cast<long>(max_turns_in_jail) + 1;
+			auto const turns_in_jail = player_state.position + static_cast<long>(max_turns_in_jail) + 1;
+			assert(turns_in_jail >= 1);
+			stat_counters.turns_in_jail[player] += turns_in_jail;
 		}
 
 		// Need to set position back to a normal board space first, since movement functions don't deal with moving
 		// directly from jail.
 		update_position(game_state, player, static_cast<unsigned>(board_space_t::just_visiting_jail));
 
-		game_state.turn.movement_roll = roll;
+		game_state.turn.movement_roll = roll.roll;
+
+		// If attempted to roll doubles, consecutive double rule doesn't apply.
+		if (jail_action != in_jail_action_t::roll_doubles) {
+			assert(player_state.consecutive_doubles == 0);
+			player_state.consecutive_doubles += roll.is_double;
+		}
+
 		// It's impossible to pass Go from jail.
-		assert(roll <= 12);
-		advance_by_spaces_no_go(game_state, player, roll);
+		assert(roll.roll <= 12);
+		advance_by_spaces_no_go(game_state, player, roll.roll);
 		on_board_space(game_state, strategies, random, player);
+
+		// Don't get another turn if tried to roll doubles.
+		return roll.is_double && (jail_action != in_jail_action_t::roll_doubles);
 	}
 
 	// Return value indicates if the player gets another turn due to rolling doubles.
@@ -170,7 +178,9 @@ namespace monopoly {
 		assert(!player_state.is_bankrupt());
 		
 		game_state.turn = turn_state_t{};
+#ifndef NDEBUG
 		game_state.turn.player = player;
+#endif
 
 		// TODO: opportunity to build/sell houses and hotels
 		// TODO: opportunity to mortgage/unmortgage properties
@@ -179,7 +189,7 @@ namespace monopoly {
 
 		bool extra_turn = false;
 		if (player_state.in_jail()) {
-			jail_turn(game_state, strategies, random, player);
+			extra_turn = jail_turn(game_state, strategies, random, player);
 		}
 		else {
 			extra_turn = normal_turn(game_state, strategies, random, player);

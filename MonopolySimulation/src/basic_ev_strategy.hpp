@@ -1,12 +1,15 @@
 #pragma once
 
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <ranges>
 #include <utility>
 
+#include "algorithm.hpp"
 #include "board_space_constants.hpp"
 #include "common_constants.hpp"
+#include "common_types.hpp"
 #include "game_state.hpp"
 #include "gameplay_constants.hpp"
 #include "math.hpp"
@@ -16,6 +19,7 @@
 #include "strategy_types.hpp"
 
 
+// First attempt at an expected-value-based strategy.
 // Basic calculations of immediate EV from various game events.
 // Ignores a lot of stuff, e.g. longer term EV (like buying property), opportunity cost, complex game state effects.
 namespace monopoly::basic_ev {
@@ -34,17 +38,36 @@ namespace monopoly::basic_ev {
 				hist[d1 + d2]++;
 			}
 		}
+		// Max is 6+6=12, min is 1+1=2
 		distribution_t<unsigned, 12 - 2 + 1> dist{};
-		for (unsigned i = 2; i < hist.size(); ++i) {
-			dist[i - 2] = {i, hist[i] / 36.0};
+		for (unsigned i = 2; i <= 12; ++i) {
+			dist[i - 2] = {i, static_cast<double>(hist[i]) / (6 * 6)};
 		}
 		return dist;
 	}();
 
-	// Distribution of the sum of 2 dice rolls where they are known to be the same.
+	// Distribution of the sum of 2 dice rolls where they are known to be the same dice value.
 	inline constexpr distribution_t<unsigned, 6> doubles_roll_distribution{{
 		{2, 1.0/6}, {4, 1.0/6}, {6, 1.0/6}, {8, 1.0/6}, {10, 1.0/6}, {12, 1.0/6}
 	}};
+
+	// Distribution of the sum of 2 dice rolls where they are known to be different dice values.
+	inline constexpr auto not_doubles_roll_distribution = []{
+		std::array<unsigned, 12 + 1> hist{};
+		for (unsigned d1 = 1; d1 <= 6; ++d1) {
+			for (unsigned d2 = 1; d2 <= 6; ++d2) {
+				if (d1 != d2) {
+					hist[d1 + d2]++;
+				}
+			}
+		}
+		// Max is 5+6=11, min is 1+2=3
+		distribution_t<unsigned, 11 - 3 + 1> dist{};
+		for (unsigned i = 3; i <= 11; ++i) {
+			dist[i - 3] = {i, hist[i] / 30.0};
+		}
+		return dist;
+	}();
 
 
 	// Probability on each turn that you have to pay the jail fine to be released, if rolling doubles.
@@ -285,16 +308,20 @@ namespace monopoly::basic_ev {
 	}
 
 
+	// TODO: want to take into account doubles roll which gives another turn
+
 	[[nodiscard]]
 	inline double movement_roll_ev(game_state_t const& game_state, unsigned const player, unsigned const roll) {
 		auto const& player_state = game_state.players[player];
 		assert(!player_state.is_bankrupt());
-		assert(!player_state.in_jail());
 		assert(roll > 0 && roll <= 12);
 
 		double ev = 0;
 
-		auto new_position = static_cast<unsigned>(player_state.position) + roll;
+		auto const position =
+			player_state.in_jail() ? static_cast<unsigned>(board_space_t::just_visiting_jail) : player_state.position;
+
+		auto new_position = position + roll;
 		if (new_position >= board_space_count) {
 			// If landing exactly on Go, salary will be accounted for in the board space handling.
 			if (new_position > board_space_count) {
@@ -323,16 +350,50 @@ namespace monopoly::basic_ev {
 		return ev;
 	}
 
-}
 
-namespace monopoly {
+	[[nodiscard]]
+	inline std::pair<in_jail_action_t, double> decide_jail_action_impl(game_state_t const& game_state,
+			unsigned const player, unsigned const turn_in_jail) {
+		assert(turn_in_jail < max_turns_in_jail);
 
-	struct basic_ev_jail_strategy_t {
+		auto const normal_roll_ev = movement_ev(game_state, player, double_dice_roll_distribution);
+		auto const doubles_roll_ev = movement_ev(game_state, player, doubles_roll_distribution);
+		auto const not_doubles_roll_ev = movement_ev(game_state, player, not_doubles_roll_distribution);
+
+		auto const pay_fine_ev = -static_cast<double>(jail_release_cost) + normal_roll_ev;
+		auto const use_card_ev = -get_out_of_jail_free_value[turn_in_jail] + normal_roll_ev;
+		auto const next_turn_ev = turn_in_jail + 1 < max_turns_in_jail
+			? decide_jail_action_impl(game_state, player, turn_in_jail + 1).second
+			// If we failed to roll doubles on the last turn, must pay fine and move. Know dice roll is not a double.
+			: -static_cast<double>(jail_release_cost) + not_doubles_roll_ev;
+		auto const roll_doubles_ev = 1.0 / 6.0 * doubles_roll_ev + 5.0 / 6.0 * next_turn_ev;
+
+		auto const use_card_best = use_card_ev >= roll_doubles_ev && use_card_ev >= pay_fine_ev;
+		if (use_card_best && game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
+			return {in_jail_action_t::get_out_of_jail_free_chance, use_card_ev};
+		}
+		else if (use_card_best
+				&& game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest)) {
+			return {in_jail_action_t::get_out_of_jail_free_community_chest, use_card_ev};
+		}
+		if (roll_doubles_ev >= pay_fine_ev) {
+			assert(roll_doubles_ev >= use_card_ev || !game_state.get_out_of_jail_free_ownership.owns_any(player));
+			return {in_jail_action_t::roll_doubles, roll_doubles_ev};
+		}
+		else {
+			assert(pay_fine_ev >= roll_doubles_ev && pay_fine_ev >= use_card_ev);
+			return {in_jail_action_t::pay_fine, pay_fine_ev};
+		}
+	}
+
+	struct jail_strategy_t {
 		[[nodiscard]]
 		static in_jail_action_t decide_jail_action(game_state_t const& game_state, random_t&, unsigned const player) {
-			// TODO
-			// consider EV of movement skew - doubles vs. normal roll
-			// consider EV of paying fine
+			auto const& player_state = game_state.players[player];
+			assert(player_state.in_jail());
+			auto const turn_in_jail = player_state.position + static_cast<int>(max_turns_in_jail);
+			assert(turn_in_jail >= 0);
+			return decide_jail_action_impl(game_state, player, static_cast<unsigned>(turn_in_jail)).first;
 		}
 	};
 

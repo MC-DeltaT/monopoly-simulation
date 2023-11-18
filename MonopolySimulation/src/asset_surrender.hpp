@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "card_constants.hpp"
+#include "card_deck_operations.hpp"
 #include "common_types.hpp"
 #include "game_state.hpp"
 #include "property_constants.hpp"
@@ -56,10 +57,11 @@ namespace monopoly {
 			detail::surrender_property_to_bank(game_state, player, railway);
 		}
 
-		for (auto const card_type : card_types) {
-			if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type)) {
-				game_state.get_out_of_jail_free_ownership.set_owner(card_type, std::nullopt);
-			}
+		if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
+			return_get_out_of_jail_free_card<card_type_t::chance>(game_state);
+		}
+		if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest)) {
+			return_get_out_of_jail_free_card<card_type_t::community_chest>(game_state);
 		}
 
 		assert(game_state.players[player].cash == 0);

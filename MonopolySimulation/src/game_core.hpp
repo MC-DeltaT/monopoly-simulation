@@ -71,9 +71,6 @@ namespace monopoly {
 			stat_counters.games++;
 			stat_counters.rounds += game_state.round;
 			stat_counters.game_length_histogram.add(game_state.round);
-			for (auto const player : players) {
-				auto const bankrupt_round = game_state.players[player].bankrupt_round;
-			}
 		}
 	}
 

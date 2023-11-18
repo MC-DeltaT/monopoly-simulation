@@ -10,7 +10,7 @@
 
 namespace monopoly {
 	
-	// Produces array of indices of elements as if they were sorted.
+	// Produces array of indices of elements as if they were sorted in ascending order.
 	template<typename T, std::size_t N, typename F = std::identity>
 	std::array<std::size_t, N> sorted_indices(std::array<T, N> const& data, F transform = std::identity{}) {
 		std::array<std::size_t, N> indices;

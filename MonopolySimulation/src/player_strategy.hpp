@@ -7,6 +7,7 @@
 
 #include "common_types.hpp"
 #include "game_state.hpp"
+#include "gameplay_constants.hpp"
 #include "property_query.hpp"
 #include "property_values.hpp"
 #include "random.hpp"
@@ -32,11 +33,45 @@ namespace monopoly {
 	};
 
 
+	// Always pay the fine if the player can afford it, otherwise roll doubles.
+	struct always_pay_jail_strategy_t {
+		[[nodiscard]]
+		static in_jail_action_t decide_jail_action(game_state_t const& game_state, random_t&, unsigned const player) {
+			if (game_state.players[player].cash >= jail_release_cost) {
+				return in_jail_action_t::pay_fine;
+			}
+			else {
+				return in_jail_action_t::roll_doubles;
+			}
+		}
+	};
+
+
 	// Always try to roll doubles to get out of jail.
 	struct always_roll_jail_strategy_t {
 		[[nodiscard]]
 		static constexpr in_jail_action_t decide_jail_action(game_state_t const&, random_t&, unsigned const) noexcept {
 			return in_jail_action_t::roll_doubles;
+		}
+	};
+
+
+	// Try in this order: Get Out Of Jail Free card, pay fine, roll doubles.
+	struct get_out_fast_jail_strategy_t {
+		[[nodiscard]]
+		static in_jail_action_t decide_jail_action(game_state_t const& game_state, random_t&, unsigned const player) {
+			if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::chance)) {
+				return in_jail_action_t::get_out_of_jail_free_chance;
+			}
+			else if (game_state.get_out_of_jail_free_ownership.is_owner(player, card_type_t::community_chest)) {
+				return in_jail_action_t::get_out_of_jail_free_community_chest;
+			}
+			else if (game_state.players[player].cash >= jail_release_cost) {
+				return in_jail_action_t::pay_fine;
+			}
+			else {
+				return in_jail_action_t::roll_doubles;
+			}
 		}
 	};
 
@@ -199,23 +234,23 @@ namespace monopoly {
 	struct player_strategies_t {
 		std::tuple<
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
-				dont_buy_unowned_property_buy_strategy_t{},
+				get_out_fast_jail_strategy_t{},
+				random_unowned_property_buy_strategy_t{0.333f},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
 				always_roll_jail_strategy_t{},
-				dont_buy_unowned_property_buy_strategy_t{},
+				random_unowned_property_buy_strategy_t{0.333f},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
-				dont_buy_unowned_property_buy_strategy_t{},
+				always_use_card_jail_strategy_t{},
+				random_unowned_property_buy_strategy_t{0.333f},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>,
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
-				dont_buy_unowned_property_buy_strategy_t{},
+				always_pay_jail_strategy_t{},
+				random_unowned_property_buy_strategy_t{0.333f},
 				dont_bid_unowned_property_bid_strategy_t{},
 				basic_forced_sale_strategy_t{}>
 		> strategies{{0}, {1}, {2}, {3}};

@@ -92,7 +92,9 @@ namespace monopoly {
 	inline void pay_go_salary(game_state_t& game_state, unsigned const player) {
 		bank_pay_player(game_state, player, go_salary);
 		assert(player == game_state.turn.player);
+#ifndef NDEBUG
 		game_state.turn.go_salary_paid = true;
+#endif
 	}
 
 }
