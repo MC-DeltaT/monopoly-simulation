@@ -32,7 +32,6 @@ namespace monopoly {
 		if (is_double) {
 			auto const consecutive_doubles = player_state.consecutive_doubles + 1;
 			if (consecutive_doubles >= consecutive_doubles_jail_threshold) {
-				player_state.consecutive_doubles = 0;
 				go_to_jail(game_state, player);
 				// Turn ends.
 				return false;
@@ -49,7 +48,6 @@ namespace monopoly {
 		advance_by_spaces(game_state, player, roll);
 		on_board_space(game_state, strategies, random, player);
 
-		// Presumably if the player is sent to jail they don't get another turn.
 		return is_double && !player_state.in_jail() && !player_state.is_bankrupt();
 	}
 
@@ -167,7 +165,8 @@ namespace monopoly {
 		on_board_space(game_state, strategies, random, player);
 
 		// Don't get another turn if tried to roll doubles.
-		return roll.is_double && (jail_action != in_jail_action_t::roll_doubles);
+		return roll.is_double && (jail_action != in_jail_action_t::roll_doubles)
+			&& !player_state.in_jail() && !player_state.is_bankrupt();
 	}
 
 	// Return value indicates if the player gets another turn due to rolling doubles.

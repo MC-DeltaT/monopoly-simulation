@@ -104,6 +104,18 @@ namespace monopoly {
 	};
 
 
+	// Alawys buy unowned property if the player can afford it.
+	struct always_buy_unowned_property_buy_strategy_t {
+		[[nodiscard]]
+		bool should_buy_unowned_property(game_state_t const& game_state, random_t&, unsigned const player,
+				PropertyType auto const property) const {
+			auto const property_value = property_buy_cost(property);
+			auto const player_cash = game_state.players[player].cash;
+			return player_cash >= property_value;
+		}
+	};
+
+
 	// Bid amount uniformly distributed around property price.
 	struct random_unowned_property_bid_strategy_t {
 		// mean(bid) = property_price * (1 + centre_adjust)
@@ -202,31 +214,35 @@ namespace monopoly {
 
 
 	template<
-		auto JailStrategy, auto UnownedPropertyBuyStrategy, auto UnownedPropertyBidStrategy, auto ForcedSaleStrategy> 
+		class JailStrategy, class UnownedPropertyBuyStrategy, class UnownedPropertyBidStrategy, class ForcedSaleStrategy> 
 	struct flexible_player_strategy_t {
 		unsigned player;
+		JailStrategy jail{};
+		UnownedPropertyBuyStrategy unowned_property_buy{};
+		UnownedPropertyBidStrategy unowned_property_bid{};
+		ForcedSaleStrategy forced_sale{};
 
 		[[nodiscard]]
 		bool should_buy_unowned_property(game_state_t const& game_state, random_t& random,
 				PropertyType auto const property) {
-			return UnownedPropertyBuyStrategy.should_buy_unowned_property(game_state, random, player, property);
+			return unowned_property_buy.should_buy_unowned_property(game_state, random, player, property);
 		}
 
 		[[nodiscard]]
 		unsigned bid_on_unowned_property(game_state_t const& game_state, random_t& random,
 				PropertyType auto const property, auction_state_t const& auction) {
-			return UnownedPropertyBidStrategy.bid_on_unowned_property(game_state, random, player, property, auction);
+			return unowned_property_bid.bid_on_unowned_property(game_state, random, player, property, auction);
 		}
 
 		[[nodiscard]]
 		in_jail_action_t decide_jail_action(game_state_t const& game_state, random_t& random) {
-			return JailStrategy.decide_jail_action(game_state, random, player);
+			return jail.decide_jail_action(game_state, random, player);
 		}
 
 		[[nodiscard]]
 		sell_to_bank_choices_t choose_assets_for_forced_sale(game_state_t const& game_state, random_t& random,
 				unsigned const min_amount) {
-			return ForcedSaleStrategy.choose_assets_for_forced_sale(game_state, random, player, min_amount);
+			return forced_sale.choose_assets_for_forced_sale(game_state, random, player, min_amount);
 		}
 	};
 
@@ -234,26 +250,31 @@ namespace monopoly {
 	struct player_strategies_t {
 		std::tuple<
 			flexible_player_strategy_t<
-				get_out_fast_jail_strategy_t{},
-				random_unowned_property_buy_strategy_t{0.333f},
-				dont_bid_unowned_property_bid_strategy_t{},
-				basic_forced_sale_strategy_t{}>,
+				get_out_fast_jail_strategy_t,
+				always_buy_unowned_property_buy_strategy_t,
+				random_unowned_property_bid_strategy_t,
+				basic_forced_sale_strategy_t>,
 			flexible_player_strategy_t<
-				always_roll_jail_strategy_t{},
-				random_unowned_property_buy_strategy_t{0.333f},
-				dont_bid_unowned_property_bid_strategy_t{},
-				basic_forced_sale_strategy_t{}>,
+				get_out_fast_jail_strategy_t,
+				always_buy_unowned_property_buy_strategy_t,
+				random_unowned_property_bid_strategy_t,
+				basic_forced_sale_strategy_t>,
 			flexible_player_strategy_t<
-				always_use_card_jail_strategy_t{},
-				random_unowned_property_buy_strategy_t{0.333f},
-				dont_bid_unowned_property_bid_strategy_t{},
-				basic_forced_sale_strategy_t{}>,
+				get_out_fast_jail_strategy_t,
+				always_buy_unowned_property_buy_strategy_t,
+				random_unowned_property_bid_strategy_t,
+				basic_forced_sale_strategy_t>,
 			flexible_player_strategy_t<
-				always_pay_jail_strategy_t{},
-				random_unowned_property_buy_strategy_t{0.333f},
-				dont_bid_unowned_property_bid_strategy_t{},
-				basic_forced_sale_strategy_t{}>
-		> strategies{{0}, {1}, {2}, {3}};
+				get_out_fast_jail_strategy_t,
+				always_buy_unowned_property_buy_strategy_t,
+				random_unowned_property_bid_strategy_t,
+				basic_forced_sale_strategy_t>
+		> strategies{
+			{.player=0, .unowned_property_bid{0.5f, 0.0f}},
+			{.player=1, .unowned_property_bid{0.25f, 0.0f}},
+			{.player=2, .unowned_property_bid{-0.25f, 0.0f}},
+			{.player=3, .unowned_property_bid{-0.5f, 0.0f}}
+		};
 
 		player_strategies_t() = default;
 		player_strategies_t& operator=(player_strategies_t&&) = default;
