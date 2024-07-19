@@ -41,6 +41,13 @@ namespace monopoly {
 				return utility;
 			}
 		}
+
+		constexpr per_propertytype_data& operator+=(per_propertytype_data const& other) {
+			street += other.street;
+			railway += other.railway;
+			utility += other.utility;
+			return *this;
+		}
 	};
 
 }

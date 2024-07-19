@@ -246,6 +246,4 @@ namespace monopoly {
 		stat_counters_t const* c;
 	};
 
-	inline statistics_t const statistics{stat_counters};
-
 }

@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bit>
+#include <cstddef>
 
 #include "common_constants.hpp"
 #include "property_constants.hpp"
@@ -13,13 +14,26 @@ namespace monopoly {
 	inline constexpr bool record_stats = true;
 
 
+	template<typename T, std::size_t N>
+	struct counter_array : public std::array<T, N> {
+		using std::array<T, N>::array;
+
+		counter_array& operator+=(counter_array const& other) {
+			for (std::size_t i = 0; i < N; ++i) {
+				(*this)[i] += other[i];
+			}
+			return *this;
+		}
+	};
+
+
 	using int_count = unsigned long long;
 	using float_count = double;
 
 	template<typename T>
-	using per_player = std::array<T, player_count>;
+	using per_player_counter = counter_array<T, player_count>;
 
-	using per_player_int_count = per_player<int_count>;
+	using per_player_int_count = per_player_counter<int_count>;
 
 	template<typename T>
 	using per_property = per_propertytype_data<
@@ -27,7 +41,10 @@ namespace monopoly {
 		std::array<T, railway_count>,
 		std::array<T, utility_count>>;
 
-	using per_property_int_count = per_property<int_count>;
+	using per_property_int_count = per_propertytype_data<
+		counter_array<int_count, street_count>,
+		counter_array<int_count, railway_count>,
+		counter_array<int_count, utility_count>>;
 
 
 	template<unsigned long long Max> requires (Max >= 2)
@@ -36,7 +53,7 @@ namespace monopoly {
 		static constexpr unsigned bin_count = std::bit_width(true_max);
 		static_assert(bin_count >= 2);
 
-		std::array<int_count, bin_count> bins;
+		counter_array<int_count, bin_count> bins;
 
 		constexpr void add(unsigned long long value) noexcept {
 			++bins[compute_bin(value)];
@@ -81,6 +98,11 @@ namespace monopoly {
 				lower_bound = bounds[i];
 			}
 			func(lower_bound, 0ull, bins.back());
+		}
+
+		log2_histogram& operator+=(log2_histogram const& other) {
+			bins += other.bins;
+			return *this;
 		}
 	};
 
@@ -128,7 +150,7 @@ namespace monopoly {
 		per_player_int_count rent_received_count{};
 
 		// Count of every time a player is on a space during their turn. Last entry is In Jail.
-		per_player<std::array<int_count, board_space_count + 1>> board_space_counts{};
+		per_player_counter<counter_array<int_count, board_space_count + 1>> board_space_counts{};
 
 		// Number of times each player is sent to jail.
 		per_player_int_count sent_to_jail_count{};
@@ -188,18 +210,66 @@ namespace monopoly {
 
 		// Cash received from selling properties.
 		per_player_int_count property_sell_income{};
+
+		stat_counters_t& operator+=(stat_counters_t const& other) {
+			auto const apply = [this, &other](auto const member) {
+				this->*member += (&other)->*member;
+			};
+
+			// TODO: there must be an easier way to do this
+			using T = stat_counters_t;
+			apply(&T::simulation_time_seconds);
+			apply(&T::games);
+			apply(&T::rounds);
+			apply(&T::game_length_histogram);
+			apply(&T::turns_played);
+			apply(&T::go_passes);
+			apply(&T::player_rank);
+			apply(&T::final_net_worth);
+			apply(&T::rent_paid_amount);
+			apply(&T::rent_paid_count);
+			apply(&T::rent_received_amount);
+			apply(&T::rent_received_count);
+			apply(&T::board_space_counts);
+			apply(&T::sent_to_jail_count);
+			apply(&T::turns_in_jail);
+			apply(&T::jail_fee_paid_count);
+			apply(&T::cards_drawn);
+			apply(&T::cash_award_card_amount);
+			apply(&T::cash_award_cards_drawn);
+			apply(&T::per_player_cash_fee_card_receive_amount);
+			apply(&T::per_player_cash_fee_card_receive_count);
+			apply(&T::per_player_cash_award_card_payment_amount);
+			apply(&T::per_player_cash_award_card_payment_count);
+			apply(&T::cash_fee_card_amount);
+			apply(&T::cash_fee_cards_drawn);
+			apply(&T::property_purchased_at_least_once);
+			apply(&T::property_first_purchase_round);
+			apply(&T::property_unowned_auction_price);
+			apply(&T::property_unowned_auction_count);
+			apply(&T::unowned_property_auctions_won);
+			apply(&T::property_purchase_costs);
+			apply(&T::property_sell_income);
+
+			return *this;
+		}
 	};
 
-	inline stat_counters_t stat_counters{};
+	inline stat_counters_t operator+(stat_counters_t lhs, stat_counters_t const& rhs) {
+		lhs += rhs;
+		return lhs;
+	}
+
+	thread_local inline stat_counters_t stat_counters{};
 
 
 	// Per-game state needed for tracking statistics.
-	// Reset st the start of each game.
+	// Reset at the start of each game.
 	struct stat_helper_state_t {
 		// Indicates if each property has been purchased from the bank yet. Once true, remains true.
 		per_property<bool> property_has_been_purchased{};
 	};
 
-	inline stat_helper_state_t stat_helper_state{};
+	thread_local inline stat_helper_state_t stat_helper_state{};
 
 }

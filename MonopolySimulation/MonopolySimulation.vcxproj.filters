@@ -45,6 +45,7 @@
     <ClInclude Include="src\basic_ev_strategy.hpp" />
     <ClInclude Include="src\math.hpp" />
     <ClInclude Include="src\strategy_types.hpp" />
+    <ClInclude Include="src\multithreading.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
